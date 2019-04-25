@@ -1,10 +1,6 @@
 import { css } from "lit-element"
 
 export const fontStyles = css`
-  .ffl {
-    font-family: "Lato", sans-serif;
-  }
-
   .ffr {
     font-family: "Roboto", sans-serif;
   }
