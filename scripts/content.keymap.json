@@ -1,0 +1,20 @@
+{
+  "types": {},
+  "weather": {},
+  "moves": {},
+  "moveBuffs": {
+    "attackerAttackStatStageChange": 1,
+    "attackerDefenseStatStageChange": 2,
+    "targetAttackStatStageChange": 4,
+    "targetDefenseStatStageChange": 8
+  },
+  "pokemon": {},
+  "pokemonImages": {
+    "shiny": 1,
+    "gender": 2
+  },
+  "pokemonRarity": {
+    "POKEMON_RARITY_MYTHIC": 1,
+    "POKEMON_RARITY_LEGENDARY": 2
+  }
+}

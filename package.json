@@ -1,0 +1,30 @@
+{
+  "name": "pogo",
+  "version": "0.9.0",
+  "description": "pokemon go reference",
+  "main": "update.js",
+  "repository": "https://github.com/liyetony/pogo.git",
+  "author": "Tony",
+  "private": true,
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.2.7",
+    "lit-element": "^2.1.0",
+    "lit-html": "^1.0.0",
+    "pwa-helpers": "^0.9.1",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0"
+  },
+  "devDependencies": {
+    "csv-parser": "^2.2.0",
+    "fs-extra": "^7.0.1",
+    "listr": "^0.14.3",
+    "request": "^2.88.0"
+  },
+  "scripts": {
+    "update": "node ./update.js",
+    "update:data": "node ./update.js data",
+    "build": "polymer build",
+    "dev": "polymer serve --port 9000"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "combat": {},
+  "upgrade": {},
+  "encounters": [
+    { "type": "wild" },
+    { "type": "quest" },
+    { "type": "hatch" },
+    { "type": "raid" }
+  ],
+  "regions": [
+    { "name": "Unknown" },
+    { "name": "Kanto",  "last": 151 },
+    { "name": "Johto",  "last": 251 },
+    { "name": "Hoenn",  "last": 386 },
+    { "name": "Sinnoh", "last": 493 },
+    { "name": "Unova",  "last": 649 },
+    { "name": "Kalos",  "last": 721 },
+    { "name": "Alola",  "last": 807 }
+  ],
+  "weather": [
+    { "name": "clear" },
+    { "name": "partly cloudy" },
+    { "name": "overcast" },
+    { "name": "rainy" },
+    { "name": "snow" },
+    { "name": "windy" },
+    { "name": "fog" }
+  ],
+  "types": [
+    { "name": "normal" },
+    { "name": "fighting" },
+    { "name": "flying" },
+    { "name": "poison" },
+    { "name": "ground" },
+    { "name": "rock" },
+    { "name": "bug" },
+    { "name": "ghost" },
+    { "name": "steel" },
+    { "name": "fire" },
+    { "name": "water" },
+    { "name": "grass" },
+    { "name": "electric" },
+    { "name": "psychic" },
+    { "name": "ice" },
+    { "name": "dragon" },
+    { "name": "dark" },
+    { "name": "fairy" }
+  ],
+  "moves": {},
+  "pokemon": {}
+}
