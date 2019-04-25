@@ -106,12 +106,13 @@ class PokemonCPFilter extends connect(store)(LitElement) {
         </ui-button>
       </header>
 
-      <textarea class="text"
+      <textarea id="filter" class="text"
         readonly
         spellcheck="false"
         .value="${filtertext}">
       </textarea>
       <span class="text-hint fc">${filtertext.length} characters</span>
+      <label for="filter" style="opacity: 0">CP Filter</label>
     `
   }
 

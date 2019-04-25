@@ -5,7 +5,7 @@ import pokemon from "../redux/reducers/pokemon"
 import { getPokemon } from "../redux/selectors/pokemon";
 import { getDisplayProps, getPokemonMovesPerspective, 
   getPokemonMovesSorter, getPokemonMoves } from "../redux/selectors/pokemon.entry"
-import { getWeatherList } from "../redux/selectors/content";
+import { getWeatherList, getTypeList } from "../redux/selectors/content";
 import { getWeatherCondition } from "../redux/selectors/session";
 import { createLazyImageIntersectionObserver, lazyLoadImages } from "../redux/modules/helper"
 import { shinyIcon, maleIcon, femaleIcon, getWeatherIcon } from "./~icons"
@@ -24,6 +24,7 @@ store.addReducers({ pokemon })
 class PokemonEntry extends connect(store)(LitElement) {
   static get properties() {
     return {
+      types: { type: Array },
       pokemon: { type: Object },
       display: { type: Object },
       weatherList: { type: Array },
@@ -35,6 +36,7 @@ class PokemonEntry extends connect(store)(LitElement) {
   }
 
   stateChanged(state) {
+    this.types =getTypeList(state)
     this.pokemon = getPokemon(state)
     this.display = getDisplayProps(state)
     this.weatherList = getWeatherList(state)
@@ -85,7 +87,7 @@ class PokemonEntry extends connect(store)(LitElement) {
   }
 
   get pokedexTemplate() {
-    const { pokemon, display } = this
+    const { pokemon, types, display } = this
 
     const shiny = display.shiny ? "s" : ""
     const female = display.gender ? "f" : ""
@@ -99,7 +101,10 @@ class PokemonEntry extends connect(store)(LitElement) {
     return html`
       <section class="pokedex">
         <div class="display">
-          <img class="display-img" loading="lazy" data-src="${displayImgUrl}">
+          <img class="display-img"
+            loading="lazy"
+            alt="${pokemon.name}"
+            data-src="${displayImgUrl}">
           <div class="display-conf">
             <ui-button icon
               class="display-ctrl shiny"
@@ -126,7 +131,10 @@ class PokemonEntry extends connect(store)(LitElement) {
         </div>
         <div class="entry">
           ${pokemon.types.map(type => html`
-            <img class="entry-type" loading="lazy" data-src="${getTypeImageUrl(type)}">
+            <img class="entry-type"
+              loading="lazy"
+              alt="${getTypeName(types, type)}"
+              data-src="${getTypeImageUrl(type)}">
           `)}
           <h1 class="entry-category fh6">${pokemon.category}</h1>
           <p class="entry-desc fbd1">${pokemon.desc}</p>
@@ -150,7 +158,7 @@ class PokemonEntry extends connect(store)(LitElement) {
   }
 
   get movesTemplate() {
-    const { weatherList, weather, movesPerspective, moves } = this
+    const { weatherList, weather, movesPerspective, types, moves } = this
     const [sortKey, sortOrder] = this.movesSorter
 
     const getOrder = key => key === sortKey ? sortOrder : 0
@@ -174,7 +182,10 @@ class PokemonEntry extends connect(store)(LitElement) {
 
     const moveTemplate = move => html`
       <div class="move">
-        <img class="move-type" loading="lazy" data-src="${getTypeImageUrl(move.type)}">
+        <img class="move-type"
+          loading="lazy"
+          alt="${getTypeName(types, move.type)}"
+          data-src="${getTypeImageUrl(move.type)}">
         <div class="move-desc">
           <div class="move-name fbd1">${move.name}</div>
           <div class="move-tags fc">${move.tags}</div>
@@ -375,6 +386,10 @@ class PokemonEntry extends connect(store)(LitElement) {
 }
 
 window.customElements.define("pokemon-entry", PokemonEntry)
+
+function getTypeName(types, index) {
+  return (types[index] || {}).name || "Missing type name"
+}
 
 function getTypeImageUrl(type) {
   return `${ROUTE.IMAGES.TYPE}/${type}.png`
