@@ -94,7 +94,10 @@ class PokemonAppraisal extends connect(store)(LitElement) {
         .label="${name}"
         ?active="${index === team}"
         @click="${e => store.dispatch(setTeam(index))}">
-        <img class="team-lead" loading="lazy" data-src="${ROUTE.IMAGES.TEAM}/${name}.png">
+        <img class="team-lead"
+          loading="lazy"
+          alt="team ${name}"
+          data-src="${ROUTE.IMAGES.TEAM}/${name}.png">
         <span class="fbt">${name}</span>
       </ui-button>
     `
