@@ -2,7 +2,7 @@
 
 A progressive web app to supplement Pokemon Go.
 
-### [Open web app](https://pogodex.withan.app)
+### [https://pogodex.withan.app](https://pogodex.withan.app)
 
 ## About
 PoGo Pokedex is a lightweight web application for inspecting or evaluating pokemon without the need to download a native mobile application or visiting slower websites.
