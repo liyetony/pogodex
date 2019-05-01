@@ -2,18 +2,19 @@ import { connect } from "pwa-helpers/connect-mixin"
 import { LitElement, css, html } from "lit-element"
 import { store } from "../redux/store"
 import pokemon from "../redux/reducers/pokemon"
-import { getPokemon } from "../redux/selectors/pokemon";
+import { getPokemon } from "../redux/selectors/pokemon"
 import { getDisplayProps, getPokemonMovesPerspective, 
   getPokemonMovesSorter, getPokemonMoves } from "../redux/selectors/pokemon.entry"
-import { getWeatherList, getTypeList } from "../redux/selectors/content";
-import { getWeatherCondition } from "../redux/selectors/session";
+import { getWeatherList, getTypeList } from "../redux/selectors/content"
+import { getWeatherCondition } from "../redux/selectors/session"
 import { createLazyImageIntersectionObserver, lazyLoadImages } from "../redux/modules/helper"
 import { shinyIcon, maleIcon, femaleIcon, getWeatherIcon } from "./~icons"
-import { fontStyles } from "./~styles";
-import { ROUTE } from "../redux/modules/session";
-import { configDisplay, sortMoves, setMovesPerspective } from "../redux/actions/pokemon";
-import { flags, MOVE_PERSPECTIVES } from "../redux/modules/pokemon";
-import { setWeather } from "../redux/actions/session";
+import { fontStyles } from "./~styles"
+import { ROUTE } from "../redux/modules/session"
+import { configDisplay, sortMoves, setMovesPerspective } from "../redux/actions/pokemon"
+import { MOVE_PERSPECTIVES } from "../redux/modules/pokemon"
+import { setWeather } from "../redux/actions/session"
+import { pokemonImageFlag } from "../../data/curator/flags"
 import "./pokemon-selector"
 import "./ui-button"
 import "./ui-sort"
@@ -92,8 +93,8 @@ class PokemonEntry extends connect(store)(LitElement) {
     const shiny = display.shiny ? "s" : ""
     const female = display.gender ? "f" : ""
     const displayImgUrl = `${ROUTE.IMAGES.POKEMON}/${pokemon.pid}${shiny}${female}.png`
-    const hasShiny = pokemon.img & flags.img.shiny
-    const hasGender = pokemon.img & flags.img.gender
+    const hasShiny = pokemon.img & pokemonImageFlag.shiny
+    const hasGender = pokemon.img & pokemonImageFlag.gender
 
     const updateDisplayProps = props => e =>
       store.dispatch(configDisplay({ ...display, ...props }))

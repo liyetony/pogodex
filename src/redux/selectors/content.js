@@ -102,7 +102,7 @@ export const getEncounterList = createSelector(
  */
 export const getWildEncounter = createSelector(
   [getEncounterList],
-  list => list.find(enc => enc.type = "wild") || {}
+  list => list.find(enc => enc.name = "wild") || {}
 )
 
 

@@ -1,65 +1,74 @@
-const FS = require("FS-extra")
-const Listr = require("listr")
-
-const Strings = require("./scripts/strings")
-const Images = require("./scripts/images")
-const Content = require("./scripts/content")
-
-const keymapData = require("./scripts/content.keymap.json")
-const mainData = require("./scripts/content.main.json")
-
-
-/**
- * Global context managing all data
- * @constant
- * @type {Object}
- */
-const context = {
-  copyPokemonImages: !process.argv.includes("data"),
-  appendHistory: process.argv.includes("save"),
-  strings: {},
-  images: {},
-  keymap: keymapData,
-  main: mainData,
-  pokemonContent: {},
-}
-
+import fs from "fs-extra"
+import Listr from "listr"
+import context from "./data/curator/context.js"
+import { loadStrings } from "./data/curator/strings.js"
+import { updatePokemonImages } from "./data/curator/images.js"
+import { updateKeymap, buildContent } from "./data/curator/content.js"
 
 // create and execute series of tasks to complete update
 const tasks = new Listr([
-  { task: Strings.load,             title: "load strings" },
-  { task: Images.updatePokemon,     title: "update pokemon images" },
-  { task: Content.createKeymap,     title: "generate gamemaster keymap" },
-  { task: Content.buildGamedata,    title: "build data from gamemaster file" },
+  { task: loadStrings,              title: "load strings" },
+  { task: updatePokemonImages,      title: "update pokemon images" },
+  { task: updateKeymap,             title: "update gamemaster keymap" },
+  { task: buildContent,             title: "build data from gamemaster file" },
   { task: exportData,               title: "export data" }
 ])
 tasks.run(context).catch(err => console.error())
 
-
-
 /**
- * Exports generated content and creates various logs:
+ * Exports game data and creates various logs:
  * @param  {Object} context - global context managing all data
+ * @return {Object} Promise - resolves upon completed task.
  */
 function exportData(context) {
-  const { strings, keymap, main, pokemonContent } = context
   const listKeys = keymap => Object.keys(keymap).reduce((text, key) => `${text}${key}\n`, "")
   const timestamp = new Date().getTime()
 
-  return Promise.all([
-    // log strings & keymap for reference
-    FS.outputJSON("logs/strings.json", strings),
-    FS.outputJSON("logs/keymap.json", keymap),
-    // create list of pokemon & move keys for updating spreadsheet
-    FS.outputFile("data/keys.moves.csv", listKeys(keymap.moves)),
-    FS.outputFile("data/keys.pokemon.csv", listKeys(keymap.pokemon)),
-    // create content files for webapp
-    FS.outputJSON("data/content.main.json", { timestamp, ...main }),
-    FS.outputJSON("data/content.pokemon.json", pokemonContent),
-    // append content files to update history
-    ...context.appendHistory ? [
-      FS.outputJSON(`data/versions/${timestamp}.main.json`, main),
-      FS.outputJSON(`data/versions/${timestamp}.pokemon.json`, pokemonContent),
-    ] : []
-  ])
+  const tasks = [
+    // logs
+    fs.ensureDir("logs"),
+    fs.outputJSON("logs/strings.json", context.strings),
+    fs.outputJSON("logs/keymap.json", context.keymap),
+    fs.outputJSON("logs/pokemonImageFlags.json", context.pokemonImageFlags),
+    fs.outputJSON("logs/ignoredTemplates.json", context.ignoredTemplates),
+    // key lists
+    fs.ensureDir("data/keys"),
+    fs.outputFile("data/keys/moves.csv", listKeys(context.keymap.moves)),
+    fs.outputFile("data/keys/pokemon.csv", listKeys(context.keymap.pokemon)),
+    fs.ensureDir("data/history")
+  ]
+
+  // export main content
+  if (isNewContent(context.content, "data/content.json")) {
+    const data = { timestamp, ...context.content }
+    tasks.push(fs.outputJSON("data/content.json", data))
+    tasks.push(fs.outputJSON(`data/history/${timestamp}.content.json`, data))
+    tasks.push(fs.outputJSON("data/timestamp.json", { timestamp }))
+  }
+
+  // export pokemon content
+  if (isNewContent(context.pokemonContent, "data/content.pokemon.json")) {
+    tasks.push(fs.outputJSON("data/content.pokemon.json", context.pokemonContent))
+    tasks.push(fs.outputJSON(`data/history/${timestamp}.content.pokemon.json`, context.pokemonContent))
+  }
+
+  return Promise.all(tasks)
+}
+
+
+/**
+ * Determine if data is different from JSON file content.
+ * Omits JSON file timestamp property for comparison.
+ * @param {Object} data - content data.
+ * @param {String} file - path to JSON content file.
+ * @returns {Boolean} whether content is new in comparison to content file.
+ */
+function isNewContent(data, file) {
+  let oldData, newData = JSON.stringify(data)
+  try {
+    const { timestamp, ...json } = fs.readJSONSync(file)
+    oldData = JSON.stringify(json)
+  }
+  catch (err) { }
+  return newData !== oldData
 }

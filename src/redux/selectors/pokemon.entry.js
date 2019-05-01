@@ -2,7 +2,7 @@ import { createSelector } from "reselect"
 import { getTypeList, getMovesDict, getWeatherScalar } from "./content"
 import { getWeatherCondition } from "./session"
 import { getPokemon } from "./pokemon"
-import { flags } from "../modules/pokemon"
+import { moveBuffFlag } from "../../../data/curator/flags"
 
 
 /**
@@ -115,10 +115,10 @@ export const getPokemonMoves = createSelector(
 function describeBuffs(list) {
   const [chance, buffs = []] = list
   const buffText = {
-    [flags.moveBuff.selfAtt]: "User attack",
-    [flags.moveBuff.selfDef]: "User defense",
-    [flags.moveBuff.oppAtt]: "Opponent attack",
-    [flags.moveBuff.oppDef]: "Opponent defense",
+    [moveBuffFlag.attackerAttackStatStageChange]: "User attack",
+    [moveBuffFlag.attackerDefenseStatStageChange]: "User defense",
+    [moveBuffFlag.targetAttackStatStageChange]: "Opponent attack",
+    [moveBuffFlag.targetDefenseStatStageChange]: "Opponent defense",
   }
   return buffs.reduce((text, [flag, value]) => {
     const direction = value > 0 ? "up" : "down"
