@@ -1,8 +1,6 @@
 import LineReader from "readline"
 import { createReadStream } from "fs"
 
-const FILE_PATH = "./assets/static_assets/txt/merged #6.txt"
-
 /**
  * Process in-game text.
  * Updates dictionary of in-game text.
@@ -10,7 +8,7 @@ const FILE_PATH = "./assets/static_assets/txt/merged #6.txt"
  * @return {Object} Promise - resolves upon completed task.
  */
 export function loadStrings(context) {
-  const { strings } = context
+  const { paths, strings } = context
   return new Promise(resolve => {
     // text file stores key-value pairs in subsequent lines,
     // so keep track of key from previous line.
@@ -18,7 +16,7 @@ export function loadStrings(context) {
 
     const getQuotedText = text => text.substring(text.indexOf('"') + 1).slice(0, -1)
 
-    LineReader.createInterface({ input: createReadStream(FILE_PATH) })
+    LineReader.createInterface({ input: createReadStream(paths.textSrc) })
       .on("line", line => {
         line = line.trim()
         

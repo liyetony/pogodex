@@ -2,9 +2,6 @@ import fs from "fs-extra"
 import streamEqual from "stream-equal"
 import { pokemonImageFlag } from "./flags.js"
 
-const POKEMON_SRCDIR = "./assets/pokemon_icons"
-const POKEMON_OUTDIR = "./images/pokemon"
-
 /**
  * Process pokemon images.
  * Updates dictionary managing pokemon image variations.
@@ -13,11 +10,11 @@ const POKEMON_OUTDIR = "./images/pokemon"
  * @return {Object} Promise - resolves upon completed task.
  */
 export function updatePokemonImages(context) {
-  const { pokemonImageFlags } = context
+  const { paths, pokemonImageFlags } = context
   const tasks = []
 
-  fs.ensureDirSync(POKEMON_OUTDIR)
-  fs.readdirSync(POKEMON_SRCDIR).forEach(file => {
+  fs.ensureDirSync(paths.pokemonImageOutDir)
+  fs.readdirSync(paths.pokemonImageSrcDir).forEach(file => {
     // get ids from file name
     let [baseId, formId = "", costumeId = ""] = file
       .replace("pokemon_icon_", "")
@@ -47,8 +44,8 @@ export function updatePokemonImages(context) {
 
 
     // get image paths for copy/rename
-    const srcPath = `${POKEMON_SRCDIR}/${file}`
-    const outPath = `${POKEMON_OUTDIR}/${pokemonId}${costumeId}${tag.shiny}${tag.female}.png`
+    const srcPath = `${paths.pokemonImageSrcDir}/${file}`
+    const outPath = `${paths.pokemonImageOutDir}/${pokemonId}${costumeId}${tag.shiny}${tag.female}.png`
 
     // queue up async image processing task
     tasks.push(new Promise(resolve => {

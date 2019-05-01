@@ -3,9 +3,6 @@ import csv from "csv-parser"
 import fs from "fs-extra"
 import { moveBuffFlag } from "./flags.js"
 
-const GAMEMASTER_PATH = "./assets/gamemaster/gamemaster.json"
-const EXCLUSIVE_MOVES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSq5HHNNYBD8ZJ5M2n-ebscY0j1LmV356tRLmRzAG3oXUr_IRg_hO4dOji6Eu8hZfuzzklh_kO7tDD_/pub?gid=0&single=true&output=csv"
-
 /**
  * Process gamemaster file and remap keys.
  * Simplifies keys used for identifying game content.
@@ -13,8 +10,8 @@ const EXCLUSIVE_MOVES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSq
  * @return {Object} Promise - resolves upon completed task.
  */
 export function updateKeymap(context) {
-  const { keymap, content } = context
-  const gamemaster = fs.readJSONSync(GAMEMASTER_PATH)
+  const { paths, keymap, content } = context
+  const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
 
   return new Promise(resolve => {
     gamemaster.itemTemplates.forEach(({ templateId, ...template }) => {
@@ -70,8 +67,8 @@ export function updateKeymap(context) {
  * @return {Object} Promise - resolves upon completed task.
  */
 export function buildContent(context) {
-  const { strings, keymap, content, pokemonContent, pokemonImageFlags } = context
-  const gamemaster = fs.readJSONSync(GAMEMASTER_PATH)
+  const { paths, strings, keymap, content, pokemonContent, pokemonImageFlags } = context
+  const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
 
   gamemaster.itemTemplates.forEach(({ templateId, ...template }) => {
     let settingId = Object.keys(template).pop()
@@ -316,11 +313,11 @@ function calcGeneration(regions, baseId, formId) {
  * @param {Object} context - global context managing all data
  */
 function patchExclusiveMoves(context) {
-  const { keymap, content } = context
+  const { paths, keymap, content } = context
   const mapHeaders = ({ header }) => header.toLowerCase()
 
   return new Promise(resolve => {
-    return Request(EXCLUSIVE_MOVES_URL)
+    return Request(paths.exclusiveMovesUrl)
       .pipe(csv({ mapHeaders }))
       .on("data", cell => {
         const moveId = keymap.moves[cell.move]
