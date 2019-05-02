@@ -8,6 +8,7 @@
   "author": "Tony",
   "private": true,
   "dependencies": {
+    "@babel/preset-env": "^7.4.4",
     "@webcomponents/webcomponentsjs": "^2.2.7",
     "lit-element": "^2.1.0",
     "lit-html": "^1.0.0",
@@ -17,14 +18,19 @@
     "reselect": "^4.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/register": "^7.4.4",
+    "chai": "^4.2.0",
     "csv-parser": "^2.2.0",
     "fs-extra": "^7.0.1",
     "listr": "^0.14.3",
+    "mocha": "^6.1.4",
     "request": "^2.88.0",
     "stream-equal": "^1.1.1"
   },
   "scripts": {
     "update": "node --experimental-modules ./update.js",
+    "test:curator": "mocha --recursive --require @babel/register",
     "build": "polymer build",
     "dev": "polymer serve --port 9000"
   }

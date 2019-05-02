@@ -9,8 +9,12 @@ import { moveBuffFlag } from "./flags.js"
  * @param {Object} context - global context managing all data.
  * @return {Object} Promise - resolves upon completed task.
  */
-export function updateKeymap(context) {
+export function updateKeymap(context = {}) {
   const { paths, keymap, content } = context
+
+  if (!paths || !keymap || !content)
+    throw "Invalid context provided"
+    
   const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
 
   return new Promise(resolve => {
@@ -66,8 +70,12 @@ export function updateKeymap(context) {
  * @param {Object} context - global context managing all data.
  * @return {Object} Promise - resolves upon completed task.
  */
-export function buildContent(context) {
+export function buildContent(context = {}) {
   const { paths, strings, keymap, content, pokemonContent, pokemonImageFlags } = context
+    
+  if (!paths || !strings || !keymap || !content || !pokemonContent || !pokemonImageFlags)
+    throw "Invalid context provided"
+
   const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
 
   gamemaster.itemTemplates.forEach(({ templateId, ...template }) => {
@@ -186,12 +194,12 @@ export function buildContent(context) {
         pokemonContent[baseId] = { desc, category }
 
         if (setting.forms) {
-          // determine if pokemon with multiple forms should extend base pokemon properties
+          // determine if base pokemon is its own entity or should be extended
           content.pokemon[baseId].extend = setting.forms.reduce((extend, form) => {
             const { form: formKey, assetBundleValue: formId } = form
             const pokemonId = `${baseId}${formId || ""}`
-            const formName = getFormName(name, formKey)
-            content.pokemon[pokemonId] = content.pokemon[pokemonId] || { name: formName }
+            const formName = getFormName(formKey)
+            content.pokemon[pokemonId] = content.pokemon[pokemonId] || { name: formName, base: baseId }
             pokemonContent[pokemonId] = pokemonContent[pokemonId] || {}
 
             // non-alolan versions of pokemon have undefined formId,
@@ -219,10 +227,10 @@ export function buildContent(context) {
         const formId = keymap.pokemon[setting.form]
         const pokemonId = `${baseId}${formId || ''}`
 
-        const gen = calcGeneration(content.regions, baseId, formId)
+        const gen = calcGeneration(content.regions, pokemonId)
         const family = keymap.pokemon[setting.familyId.slice(7)]   // FAMILY_***
         const rarity = keymap.pokemonRarity[setting.rarity]
-        const img = pokemonImageFlags[`${baseId}${formId || ""}`]
+        const img = pokemonImageFlags[pokemonId]
 
         const getMoveId = moveKey => keymap.moves[moveKey]
         const fastMoves = (setting.quickMoves || []).map(getMoveId)
@@ -273,16 +281,15 @@ export function buildContent(context) {
 
 /**
  * Calculate pokemon name for specific form.
- * @param {String} baseName - pokemon name w/o form
  * @param {String} formKey - pokemon form
  */
-function getFormName(baseName, formKey) {
+export function getFormName(formKey) {
   const capitalize = s => `${s.charAt(0).toUpperCase()}${s.slice(1)}`
 
   let key = String(formKey).toLowerCase()
 
   if (key.endsWith("_alola"))
-    return `Alolan ${baseName}`
+    return `Alolan ${capitalize(key.replace("_alola", ""))}`
 
   return key
     .replace("exclamation_point", "!")
@@ -295,15 +302,14 @@ function getFormName(baseName, formKey) {
 /**
  * Calculate generation to which pokemon was introduced.
  * @param {Array} regions - list of regions
- * @param {String} baseId - pokemon base ID
- * @param {String} formId - pokemon form ID
+ * @param {String} pokemonId - pokemon ID
  * @return {Number} generation
  */
-function calcGeneration(regions, baseId, formId) {
-  baseId = Number(baseId)
-  formId = String(formId)
+export function calcGeneration(regions, pokemonId = "") {
+  const baseId = Number(pokemonId.slice(0, 4))
+  const formId = String(pokemonId.slice(4) || "")
 
-  const regionIndex = regions.findIndex(region => baseId <= region.last)
+  const regionIndex = regions.findIndex(region => baseId > 0 && baseId <= region.last)
 
   return formId === "61" ? 7 : Math.max(0, regionIndex)
 }

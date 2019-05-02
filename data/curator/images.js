@@ -7,10 +7,14 @@ import { pokemonImageFlag } from "./flags.js"
  * Updates dictionary managing pokemon image variations.
  * Copy & rename updated pokemon images from assets.
  * @param {Object} context - global context managing all data.
- * @return {Object} Promise - resolves upon completed task.
+ * @return {Array} promise with list of copies made.
  */
-export function updatePokemonImages(context) {
+export function updatePokemonImages(context = {}) {
   const { paths, pokemonImageFlags } = context
+
+  if (!paths || !pokemonImageFlags)
+    throw "Invalid context provided"
+
   const tasks = []
 
   fs.ensureDirSync(paths.pokemonImageOutDir)
@@ -57,9 +61,9 @@ export function updatePokemonImages(context) {
         if (!equal) {
           fs.createReadStream(srcPath)
             .pipe(fs.createWriteStream(outPath))
-            .on("close", resolve)
+            .on("close", () => resolve(1))
         }
-        else resolve()
+        else resolve(0)
       })
     }))
   })

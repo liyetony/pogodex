@@ -1,6 +1,7 @@
 #local
 assets/
 build/
+test/fs
 *firebase*
 
 # Logs

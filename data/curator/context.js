@@ -1,12 +1,12 @@
 /**
  * Default path configuration
  */
-const pathConfig = {
+export const defaultPaths = {
   logDir: "logs",
   dataDir: "data",
   textSrc: "assets/static_assets/txt/merged #6.txt",
   pokemonImageSrcDir: "assets/pokemon_icons",
-  pokemonImageOutDir:  "assets/pokemon",
+  pokemonImageOutDir:  "images/pokemon",
   gamemasterSrc: "assets/gamemaster/gamemaster.json",
   exclusiveMovesUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSq5HHNNYBD8ZJ5M2n-ebscY0j1LmV356tRLmRzAG3oXUr_IRg_hO4dOji6Eu8hZfuzzklh_kO7tDD_/pub?gid=0&single=true&output=csv"
 }
@@ -39,13 +39,13 @@ const content = {
   ],
   regions: [
     { name: "Unknown" },
-    { name: "Kanto",  last: 151 },
-    { name: "Johto",  last: 251 },
-    { name: "Hoenn",  last: 386 },
-    { name: "Sinnoh", last: 493 },
-    { name: "Unova",  last: 649 },
-    { name: "Kalos",  last: 721 },
-    { name: "Alola",  last: 807 }
+    { name: "Kanto",  first:   1, last: 151 },
+    { name: "Johto",  first: 152, last: 251 },
+    { name: "Hoenn",  first: 252, last: 386 },
+    { name: "Sinnoh", first: 387, last: 493 },
+    { name: "Unova",  first: 494, last: 649 },
+    { name: "Kalos",  first: 650, last: 721 },
+    { name: "Alola",  first: 722, last: 807 }
   ],
   weather: [
     { name: "clear" },
@@ -83,28 +83,11 @@ const content = {
 }
 
 /**
- * Global context managing all data.
- * @type {Object}
- */
-export default {
-  keymap,
-  content,
-  // pokemon related content to be lazily loaded
-  pokemonContent: {},
-  // manages all image variations for every pokemon
-  pokemonImageFlags: {},
-  // dictionary of in-game text
-  strings: {},
-  // templates that have not been processed while processing gamemaster
-  ignoredTemplates: {}
-}
-
-/**
  * Create initial context.
  * @param {Object} paths - path configuration
  * @returns {Object} initial context
  */
-export function initContext(paths = pathConfig) {
+export function initContext(paths = defaultPaths) {
   return {
     paths,
     keymap,
