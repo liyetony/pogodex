@@ -1,7 +1,7 @@
 import Request from "request"
 import csv from "csv-parser"
 import fs from "fs-extra"
-import { moveBuffFlag } from "./flags.js"
+import { moveBuffFlag, pokemonImageFlag } from "./flags.js"
 
 /**
  * Process gamemaster file and remap keys.
@@ -230,7 +230,11 @@ export function buildContent(context = {}) {
         const gen = calcGeneration(content.regions, pokemonId)
         const family = keymap.pokemon[setting.familyId.slice(7)]   // FAMILY_***
         const rarity = keymap.pokemonRarity[setting.rarity]
-        const img = pokemonImageFlags[pokemonId]
+        let img = pokemonImageFlags[pokemonId]
+
+        // derive image from base if no image is present
+        if (!img && pokemonImageFlags[baseId])
+          img = pokemonImageFlags[baseId] | pokemonImageFlag.base
 
         const getMoveId = moveKey => keymap.moves[moveKey]
         const fastMoves = (setting.quickMoves || []).map(getMoveId)

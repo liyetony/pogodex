@@ -64,7 +64,7 @@ describe("update pokemon content", function() {
     before("loadStrings(context)", done => {
       loadStrings(context)
         .then(total => totalStrings = total)
-        .catch(err => done(err))
+        .catch(console.error)
         .finally(done)
     })
 
@@ -87,7 +87,7 @@ describe("update pokemon content", function() {
     before("updatePokemonImages(context)", done => {
       updatePokemonImages(context)
         .then(tasks => totalCopied = tasks.reduce((sum, copy) => sum + copy, 0))
-        .catch(err => done(err))
+        .catch(console.error)
         .finally(done)
     })
 
@@ -115,7 +115,7 @@ describe("update pokemon content", function() {
           const totalCopied = tasks.reduce((sum, copy) => sum + copy, 0)
           expect(totalCopied).to.equal(0)
         })
-        .catch(err => done(err))
+        .catch(console.error)
         .finally(done)
     })
 
@@ -129,7 +129,7 @@ describe("update pokemon content", function() {
           const totalCopied = tasks.reduce((sum, copy) => sum + copy, 0)
           expect(totalCopied).to.equal(4)
         })
-        .catch(err => done(err))
+        .catch(console.error)
         .finally(done)
     })
 
@@ -334,7 +334,7 @@ describe("update pokemon content", function() {
     before("exportData(context)", done => {
       exportData(context)
         .then(_timestamp => timestamp = _timestamp)
-        .catch(err => done(err))
+        .catch(console.error)
         .finally(done)
     })
 
@@ -372,10 +372,10 @@ describe("update pokemon content", function() {
 
     it("should not change content json files upon no changes from update", done => {
       exportData(context).then(newTimestamp => {
-        const content = fs.readJSONSync(`${paths.dataDir}/content.json`)
-        expect(content.timestamp).to.equal(timestamp)
+        const { timestamp } = fs.readJSONSync(`${paths.dataDir}/timestamp.json`)
+        expect(timestamp).to.equal(timestamp)
       })
-      .catch(err => done(err))
+      .catch(console.error)
       .finally(done)
     })
 
@@ -384,7 +384,7 @@ describe("update pokemon content", function() {
         const historyDir = fs.readdirSync(`${paths.dataDir}/history`)
         expect(historyDir).satisfies(list => !list.some(file => file.startsWith(newTimestamp)))
       })
-      .catch(err => done(err))
+      .catch(console.error)
       .finally(done)
     })
   })
