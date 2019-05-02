@@ -77,14 +77,16 @@ export function buildContent(context = {}) {
     throw "Invalid context provided"
 
   const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
-
   gamemaster.itemTemplates.forEach(({ templateId, ...template }) => {
     let settingId = Object.keys(template).pop()
     let setting = template[settingId]
 
     switch(settingId) {
       case "playerLevel": {
+        // add list of cp multipliers by level
         content.upgrade.cpMultipliers = setting.cpMultiplier
+
+        // add level range for every encounter, stored as a tuple [min level, max level]
         content.encounters.forEach(encounter => {
           switch (encounter.name) {
             case "wild":
@@ -100,24 +102,32 @@ export function buildContent(context = {}) {
       }
 
       case "pokemonUpgrades": {
+        // add list of candy costs by level for pokemon upgrades
         content.upgrade.candyCosts = setting.candyCost
+        // add list of stardust costs by level for pokemon upgrades
         content.upgrade.stardustCosts = setting.stardustCost
         break
       }
 
       case "luckyPokemonSettings": {
+        // add stardust cost multipler for lucky pokemon
         content.upgrade.stardustCostLuckyScalar = setting.powerUpStardustDiscountPercent
         break
       }
 
       case "combatStatStageSettings": {
+        // add list of attack multipliers for varying buff stages
         content.combat.attackBuffMultiplier = setting.attackBuffMultiplier
+        // add list of defense multipliers for varying buff stages
         content.combat.defenseBuffMultiplier = setting.defenseBuffMultiplier
         break
       }
 
       case "weatherBonusSettings": {
+        // add attack multiplier from weather effects
         content.combat.attackMultiplierFromWeather = setting.attackBonusMultiplier
+
+        // add level and IV bonuses from weather effects
         content.encounters.forEach(encounter => {
           switch (encounter.name) {
             case "wild":
@@ -145,12 +155,18 @@ export function buildContent(context = {}) {
 
       case "typeEffective": {
         const id = keymap.types[setting.attackType]
+        // add list of multipliers against defending types for attacking type
         content.types[id].scalar = setting.attackScalar
         break
       }
 
       case "moveSettings": {
         const mid = keymap.moves[setting.movementId]
+        // add properties for move
+        // name: move name
+        // type: move type
+        // gym: [move power, energy gain or cost] for gym battles and raids
+        // time: [move duration, damage start window, damage end window]
         content.moves[mid] = {
           ...content.moves[mid] || {},
           name: strings[`move_name_${mid}`] || "???",
@@ -167,6 +183,10 @@ export function buildContent(context = {}) {
 
       case "combatMove": {
         const mid = keymap.moves[setting.uniqueId]
+        // add properties for move
+        // name: move name
+        // type: move type
+        // battle: [move power, energy gain or cost] for trainer battles
         content.moves[mid] = {
           ...content.moves[mid] || {},
           name: strings[`move_name_${mid}`] || "???",
@@ -174,10 +194,12 @@ export function buildContent(context = {}) {
           battle: [setting.power || 0, setting.energyDelta || 0],
         }
 
+        // add potential buffs for trainer battles
         if (setting.buffs) {
           let { buffActivationChance: chance, ...buffs } = setting.buffs
           chance = Math.round(chance * 10) / 10
           buffs = Object.keys(buffs).map(k => [moveBuffFlag[k], buffs[k]])
+          // [buff activation chance, bit flags for move buffs]
           content.moves[mid].buffs = [chance, buffs]
         }
         break
@@ -188,24 +210,41 @@ export function buildContent(context = {}) {
         const name = strings[`pokemon_name_${baseId}`] || "???"
         const desc = strings[`pokemon_desc_${baseId}`] || "???"
         const category = strings[`pokemon_category_${baseId}`] || "???"
-
-        // prioritize pokemon content
-        content.pokemon[baseId] = { name }
+        const gen = calcGeneration(content.regions, baseId)
+        const baseImg = pokemonImageFlags[baseId]
+        
+        // add root pokemon name, generation, and image flags
+        content.pokemon[baseId] = { name, gen, img: baseImg }
+        // add root pokemon category and description
         pokemonContent[baseId] = { desc, category }
-
+        
         if (setting.forms) {
-          // determine if base pokemon is its own entity or should be extended
-          content.pokemon[baseId].extend = setting.forms.reduce((extend, form) => {
-            const { form: formKey, assetBundleValue: formId } = form
-            const pokemonId = `${baseId}${formId || ""}`
-            const formName = getFormName(formKey)
-            content.pokemon[pokemonId] = content.pokemon[pokemonId] || { name: formName, base: baseId }
-            pokemonContent[pokemonId] = pokemonContent[pokemonId] || {}
+          // Pokemon with multiple forms extend data from root pokemon, 
+          // so root pokemon do not have their own entry.
+          // 1st gen pokemon with alolan forms have a redudant NORMAL form with an
+          // undefined assetBundleValue. 
+          // In this situation, root pokemon should have its own entry and not be extended.
+          const shouldExtend = !setting.forms.some(form => !form.assetBundleValue)
+          if (shouldExtend)
+            content.pokemon[baseId].extend = true
 
-            // non-alolan versions of pokemon have undefined formId,
-            // so base form should not be extended
-            return extend && Boolean(formId)
-          }, true)
+          setting.forms.forEach(form => {
+            const { form: formKey, assetBundleValue: formId } = form
+            if (formId) {
+              const pokemonId = `${baseId}${formId}`
+              const name = getFormName(formKey)
+              const gen = calcGeneration(content.regions, pokemonId)
+  
+              // pokemon with NORMAL forms arent mapped to their own images.
+              // use base form images
+              const formImg = pokemonImageFlags[pokemonId] || baseImg
+              
+              // add pokemon form name, generation, and image flags
+              content.pokemon[pokemonId] = { name, gen, img: formImg }
+              // create entry for pokemon form
+              pokemonContent[pokemonId] = {}
+            }
+          })
         }
         break
       }
@@ -214,6 +253,8 @@ export function buildContent(context = {}) {
         const baseId = keymap.pokemon[setting.pokemon]
         const formId = keymap.pokemon[templateId.slice(20)]    // SPAWN_V####_POKEMON_<KEY>
         const pokemonId = formId === baseId ? baseId : `${baseId}${formId || ""}`
+
+        // add gender ratios property to pokemon as a triplet [neutral, male, female]
         pokemonContent[pokemonId].gender = [
           setting.gender.genderlessPercent || 0,
           setting.gender.malePercent || 0,
@@ -227,25 +268,21 @@ export function buildContent(context = {}) {
         const formId = keymap.pokemon[setting.form]
         const pokemonId = `${baseId}${formId || ''}`
 
-        const gen = calcGeneration(content.regions, pokemonId)
         const family = keymap.pokemon[setting.familyId.slice(7)]   // FAMILY_***
         const rarity = keymap.pokemonRarity[setting.rarity]
-        let img = pokemonImageFlags[pokemonId]
-
-        // derive image from base if no image is present
-        if (!img && pokemonImageFlags[baseId])
-          img = pokemonImageFlags[baseId] | pokemonImageFlag.base
-
         const getMoveId = moveKey => keymap.moves[moveKey]
         const fastMoves = (setting.quickMoves || []).map(getMoveId)
         const chargeMoves = (setting.cinematicMoves || []).map(getMoveId)
 
-        // prioritize pokemon content
+        // add pokemon properties
+        // fam: pokemon family
+        // rarity: pokemon rarity
+        // types: [first type, optional second type]
+        // stats: [base attack, base defense, base stamina],
+        // moves: list of both fast moves that gain energy and charge moves that consume energy
         content.pokemon[pokemonId] = {
           ...content.pokemon[pokemonId],
           fam: family,
-          img,
-          gen,
           rarity,
           types: [setting.type, setting.type2]
             .filter(Boolean)
@@ -257,6 +294,11 @@ export function buildContent(context = {}) {
           ],
           moves: content.pokemon[pokemonId].moves || [...fastMoves, ...chargeMoves],
         }
+
+        // add pokemon properties
+        // weight: pokemon weight
+        // height: pokemon height
+        // dist: buddy walking distance
         pokemonContent[pokemonId] = {
           ...pokemonContent[pokemonId],
           weight: Math.round(setting.pokedexWeightKg * 10) / 10,
@@ -268,9 +310,11 @@ export function buildContent(context = {}) {
 
       case "smeargleMovesSettings": {
         const pokemonId = keymap.pokemon.SMEARGLE
-        const getMoveId = moveKey => `${keymap.moves[moveKey]}M`
+        const getMoveId = moveKey => `${keymap.moves[moveKey]}C`
         const fastMoves = (setting.quickMoves || []).map(getMoveId)
         const chargeMoves = (setting.cinematicMoves || []).map(getMoveId)
+
+        // add moves for Smeargle, all moves are tagged with 'C' for "copy"
         content.pokemon[pokemonId].moves = [...fastMoves, ...chargeMoves]
         break
       }
@@ -289,16 +333,20 @@ export function buildContent(context = {}) {
  */
 export function getFormName(formKey) {
   const capitalize = s => `${s.charAt(0).toUpperCase()}${s.slice(1)}`
-
   let key = String(formKey).toLowerCase()
 
+  // rename alolan forms
   if (key.endsWith("_alola"))
     return `Alolan ${capitalize(key.replace("_alola", ""))}`
 
   return key
+    // rename Unown !
     .replace("exclamation_point", "!")
+    // rename Unown ?
     .replace("question_mark", "?")
+    // break multi words
     .split("_")
+    // capitalize every word
     .map(capitalize)
     .join(" ")
 }
@@ -313,8 +361,11 @@ export function calcGeneration(regions, pokemonId = "") {
   const baseId = Number(pokemonId.slice(0, 4))
   const formId = String(pokemonId.slice(4) || "")
 
+  // find region by comparing pokedex entry against last pokedex entry for each generation
   const regionIndex = regions.findIndex(region => baseId > 0 && baseId <= region.last)
 
+  // alolan forms from first gen should be marked as gen 7
+  // regionIndex is -1 when no region is matched, default to 0 for unknown region
   return formId === "61" ? 7 : Math.max(0, regionIndex)
 }
 
@@ -324,17 +375,16 @@ export function calcGeneration(regions, pokemonId = "") {
  */
 function patchExclusiveMoves(context) {
   const { paths, keymap, content } = context
-  const mapHeaders = ({ header }) => header.toLowerCase()
 
   return new Promise(resolve => {
     return Request(paths.exclusiveMovesUrl)
-      .pipe(csv({ mapHeaders }))
-      .on("data", cell => {
-        const moveId = keymap.moves[cell.move]
-        const pokemonId = keymap.pokemon[cell.pokemon]
-
-        // get exclusive status tag (L: legacy, E: event)
-        const tag = cell.type.charAt(0)
+      .pipe(csv())
+      .on("data", CELL => {
+        // get type of exclusitivity
+        // L for Legacy and E for Event
+        const tag = CELL.TYPE.charAt(0)
+        const moveId = keymap.moves[CELL.MOVE]
+        const pokemonId = keymap.pokemon[CELL.POKEMON]
 
         // check if move exists
         const index = content.pokemon[pokemonId].moves
