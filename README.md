@@ -20,9 +20,8 @@ On its own, **Pokemon Go** is already a battery draining mobile game. Looking up
 
 
 ## Installation
-1. Ensure [Node.js](https://nodejs.org/en/) is at least version ```12.1.0```
-   to support experimental modules.
-   [[Blog post]](https://medium.com/@nodejs/announcing-a-new-experimental-modules-1be8d2d6c2ff)
+1. Ensure [Node.js](https://nodejs.org/en/) is at least version ```12.1.0``` to 
+   [support experimental modules](https://medium.com/@nodejs/announcing-a-new-experimental-modules-1be8d2d6c2ff).
 2. Install [Polymer CLI](https://www.npmjs.com/package/polymer-cli) to develop and build PWA.
 3. Clone repository and install package dependencies:
    ```sh
