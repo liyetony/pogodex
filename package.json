@@ -29,11 +29,12 @@
     "stream-equal": "^1.1.1"
   },
   "scripts": {
-    "preinstall": "git clone https://github.com/ZeChrales/PogoAssets.git assets",
+    "preinstall": "node ./preinstall.js",
+    "postinstall": "npm run update",
     "update": "node --experimental-modules ./update.js",
-    "test": "npm run test:curator",
-    "test:curator": "mocha --recursive --require @babel/register",
+    "test": "npm run test:update",
+    "test:update": "mocha --recursive --require @babel/register",
     "build": "polymer build",
-    "dev": "polymer serve --port 9000"
+    "start": "polymer serve --port 9000"
   }
 }

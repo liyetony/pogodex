@@ -1,45 +1,42 @@
 # PoGo Pokedex
 
-### A progressive web app to supplement Pokemon Go.
+[![Build Status](https://travis-ci.com/liyetony/pogodex.svg?branch=master)](https://travis-ci.com/liyetony/pogodex)
+
+### A <abbr title="progressive web app">PWA</abbr> to supplement Pokemon Go.
 ### [https://pogodex.withan.app](https://pogodex.withan.app)
 
-PoGo Pokedex was created with emphasis on **high performance** and **easy access**, all while providing a pleasant user experience.
+## Overview
+On its own, **Pokemon Go** is already a battery draining mobile game. Looking up pokemon details on non-optimized websites only *intensifies* battery costs.
+**PoGo Pokedex** intends to do better by being **performant**, all while providing a pleasant user experience.
 
-# Contributing
 
-### Google Sheets
-Exclusive moves are updated via Google sheets. 
-https://docs.google.com/spreadsheets/d/1UEFmGd2JRrW1mFr8qtR1Sh2V0zeDOZ8v-ccB9hpde-A/edit?usp=sharing
 
-### 1. Download Pokemon Go Assets:
-Clone [Pokemon Go Unity Assets](https://github.com/ZeChrales/PogoAssets) repository to
-```/assets``` folder. Alternatively, you may create a symbolic link directing ```/assets```
-to where you saved the respository. This is important, as **content** and **images** are updated by referencing ```/assets```.
+## Content Sources
+- Pokemon Go **images** and **game data** are pulled from
+  [PoGo Unity Assets](https://github.com/ZeChrales/PogoAssets) repository.
+- List of **exclusive moves** is maintained in a
+  [Google Sheets document](https://docs.google.com/spreadsheets/d/1UEFmGd2JRrW1mFr8qtR1Sh2V0zeDOZ8v-ccB9hpde-A/edit?usp=sharing).
 
-### 2. Install dependencies:
 
-#### [Node.js](https://nodejs.org/en/) ```12.1.0+```
-#### [Polymer CLI](https://www.npmjs.com/package/polymer-cli) ```1.9.6+```
 
-### 3. Developing:
-To update content:
-```bash
-$ npm run update
-```
+## Installation
+1. Ensure [Node.js](https://nodejs.org/en/) is at least version ```12.1.0```
+   to support experimental modules.
+   [[Blog post]](https://medium.com/@nodejs/announcing-a-new-experimental-modules-1be8d2d6c2ff)
+2. Install [Polymer CLI](https://www.npmjs.com/package/polymer-cli) to develop and build PWA.
+3. Clone repository and install package dependencies:
+   ```sh
+   $ npm install
+   ```
 
-To start up a development server:
-```bash
-$ npm run dev
-```
 
-To build web app for deployment:
-```bash
-$ npm run build
-```
 
-# Related Resources
-- [pwa-starter-kit](https://pwa-starter-kit.polymer-project.org/)
-- [Lit-Element](https://lit-element.polymer-project.org/)
-- [lit-html](https://lit-html.polymer-project.org/)
-- [Redux](https://redux.js.org/)
-- [hammerjs](https://hammerjs.github.io/)
+## Development
+Command                | Description
+---------------------- | -----------
+```$ npm run update``` | updates web app content and assets
+```$ npm start```      | starts development server for web app
+```$ npm test```       | run all tests
+```$ npm test:update```| run ```mocha``` tests for content update process
+```$ npm build```      | build pwa using ```polymer CLI```
+```$ npm preinstall``` | clear ```/assets``` directory and clone unity assets repositorvy
