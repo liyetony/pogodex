@@ -30,6 +30,7 @@
   },
   "scripts": {
     "update": "node --experimental-modules ./update.js",
+    "test": "npm run test:curator",
     "test:curator": "mocha --recursive --require @babel/register",
     "build": "polymer build",
     "dev": "polymer serve --port 9000"
