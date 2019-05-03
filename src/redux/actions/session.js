@@ -1,5 +1,5 @@
-import { ROUTE, importPage } from "../modules/session"
-import { debounce } from "../modules/helper"
+import { ROUTE, importPage } from "../../modules/session"
+import { debounce } from "../../modules/helper"
 
 export const UPDATE_ROUTE = "UPDATE_ROUTE"
 export const OPEN_SNACKBAR = "OPEN_SNACKBAR"

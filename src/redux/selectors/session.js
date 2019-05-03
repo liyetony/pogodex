@@ -1,5 +1,5 @@
 import { createSelector } from "reselect"
-import { ROUTE, ROUTE_DESC } from "../modules/session"
+import { ROUTE, ROUTE_DESC } from "../../modules/session"
 
 
 /**

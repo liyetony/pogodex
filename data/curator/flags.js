@@ -12,7 +12,7 @@ export const moveBuffFlag = {
  * Flags for pokemon image variations.
  */
 export const pokemonImageFlag = {
-  base: 1,
+  extend: 1,
   shiny: 2,
   gender: 4,
 }

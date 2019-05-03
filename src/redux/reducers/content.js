@@ -2,7 +2,7 @@ import {
   FETCH_MAIN_CONTENT, UPDATE_MAIN_CONTENT,
   FETCH_POKEMON_CONTENT, UPDATE_POKEMON_CONTENT
 } from "../actions/content"
-import { deepCopy } from "../modules/helper"
+import { deepCopy } from "../../modules/helper"
 
 /**
  * Content reducer. Manages app content state.

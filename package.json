@@ -8,8 +8,7 @@
   "author": "Tony",
   "private": true,
   "dependencies": {
-    "@babel/preset-env": "^7.4.4",
-    "@webcomponents/webcomponentsjs": "^2.2.7",
+    "@webcomponents/webcomponentsjs": "^2.2.10",
     "lit-element": "^2.1.0",
     "lit-html": "^1.0.0",
     "pwa-helpers": "^0.9.1",
@@ -19,6 +18,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
     "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
     "csv-parser": "^2.2.0",
@@ -32,8 +32,7 @@
     "preinstall": "node ./preinstall.js",
     "postinstall": "npm run update",
     "update": "node --experimental-modules ./update.js",
-    "test": "npm run test:update",
-    "test:update": "mocha --recursive --require @babel/register",
+    "test": "mocha --recursive --require @babel/register",
     "build": "polymer build",
     "start": "polymer serve --port 9000"
   }

@@ -237,7 +237,7 @@ export function buildContent(context = {}) {
   
               // pokemon with NORMAL forms arent mapped to their own images.
               // use base form images
-              const formImg = pokemonImageFlags[pokemonId] || baseImg
+              const formImg = pokemonImageFlags[pokemonId] || baseImg | pokemonImageFlag.extend
               
               // add pokemon form name, generation, and image flags
               content.pokemon[pokemonId] = { name, gen, img: formImg }

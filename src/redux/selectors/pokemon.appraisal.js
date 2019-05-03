@@ -2,7 +2,7 @@ import { createSelector } from "reselect"
 import { getStardustCosts, getStardustLuckyMultiplier, getCPMultipliers } from "./content";
 import { getTeam } from "./settings";
 import { getPokemon } from "./pokemon";
-import { IVT_RANGE, MAX_IVT, IV_RANGE, MAX_IV, calcCPMStep, calcHP, calcCP } from "../modules/pokemon";
+import { IVT_RANGE, MAX_IVT, IV_RANGE, MAX_IV, calcCPMStep, calcHP, calcCP } from "../../modules/pokemon";
 
 
 /**

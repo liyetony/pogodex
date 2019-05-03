@@ -1,27 +1,4 @@
 /**
- * Pokemon related bit-flags.
- * @constant
- * @readonly
- * @type {Object}
- */
-export const flags = {
-  img: {
-    shiny: 1,
-    gender: 2
-  },
-  rarity: {
-    mythic: 1,
-    legendary: 2
-  },
-  moveBuff: {
-    selfAtt: 1,
-    selfDef: 2,
-    oppAtt: 4,
-    oppDef: 8
-  }
-}
-
-/**
  * Move list perspective.
  * @constant
  * @readonly

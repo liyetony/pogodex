@@ -1,5 +1,6 @@
 import { createSelector } from "reselect"
-import { deepCopy } from "../modules/helper"
+import { deepCopy } from "../../modules/helper"
+import { pokemonImageFlag } from "../../../data/curator/flags";
 
 /**
  * Get content availability status.
@@ -124,12 +125,14 @@ export const getPokemonDict = createSelector(
  */
 export const getPokemonList = createSelector(
   [getPokemonDict],
-  dict => Object.entries(dict)
-    .filter(([pid, pokemon]) => !pokemon.base)
-    .map(([pid, { name }]) => {
-      const bid = pid.slice(0,4)
+  dict => Object.keys(dict)
+    .filter(pid => !dict[pid].extend)
+    .map(pid => {
+      const pokemon = dict[pid]
+      const bid = pid.slice(0, 4)
       const fid = pid.slice(4)
-      return { pid, bid, fid, name }
+      const image = pokemon.img & pokemonImageFlag.extend ? bid : pid
+      return { pid, bid, fid, image, name: pokemon.name }
     })
     .sort((p1, p2) => p1.bid - p2.bid || p1.fid - p2.fid)
 )

@@ -3,8 +3,8 @@ import { LitElement, css, html } from "lit-element"
 import { store } from "../redux/store"
 import { getPage } from "../redux/selectors/session"
 import { isSearching, getQuery, getQueriedPokemon } from "../redux/selectors/session.search"
-import { createLazyImageIntersectionObserver, lazyLoadImages } from "../redux/modules/helper"
-import { ROUTE } from "../redux/modules/session"
+import { createLazyImageIntersectionObserver, lazyLoadImages } from "../modules/helper"
+import { ROUTE } from "../modules/session"
 import { cancelSearch, appSearch } from "../redux/actions/session"
 import { backIcon, pokeballIcon } from "./~icons"
 import { fontStyles } from "./~styles"
@@ -49,7 +49,7 @@ class AppSearch extends connect(store)(LitElement) {
         href="${page}#${pokemon.pid}">
         <div class="item-avatar">
           <img class="item-img" loading="lazy"
-            data-src="${ROUTE.IMAGES.POKEMON}/${pokemon.pid}.png"
+            data-src="${ROUTE.IMAGES.POKEMON}/${pokemon.image}.png"
             @load="${e => e.currentTarget.classList.add("ok")}">
           ${pokeballIcon}
         </div>

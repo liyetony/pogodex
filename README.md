@@ -35,7 +35,6 @@ Command                | Description
 ---------------------- | -----------
 ```$ npm run update``` | updates web app content and assets
 ```$ npm start```      | starts development server for web app
-```$ npm test```       | run all tests
-```$ npm test:update```| run ```mocha``` tests for content update process
+```$ npm test```       | run tests
 ```$ npm build```      | build pwa using ```polymer CLI```
 ```$ npm preinstall``` | clear ```/assets``` directory and clone unity assets repositorvy

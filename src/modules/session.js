@@ -47,21 +47,21 @@ export function importPage(path, hash) {
       break
     case ROUTE.POKEDEX:
       if (hash)
-        import("../../components/pokemon-entry.js")
+        import("../components/pokemon-entry.js")
       else
-        import("../../components/pokemon-list.js")
+        import("../components/pokemon-list.js")
       break
     case ROUTE.APPRAISAL:
-      import("../../components/pokemon-appraisal.js")
+      import("../components/pokemon-appraisal.js")
       break
     case ROUTE.CP_FILTER:
-      import("../../components/pokemon-cpfilter.js")
+      import("../components/pokemon-cpfilter.js")
       break
     case ROUTE.SETTINGS:
-      import("../../components/app-settings.js")
+      import("../components/app-settings.js")
       break
     default:
-      import("../../components/app-error.js")
+      import("../components/app-error.js")
       path = ROUTE.ERROR
   }
   return path
