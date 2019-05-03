@@ -10,10 +10,10 @@ import {
 } from "../redux/selectors/pokemon.appraisal"
 import {
   createLazyImageIntersectionObserver, lazyLoadImages, getPercent
-} from "../redux/modules/helper"
-import { TEAMS } from "../redux/modules/settings"
-import { ROUTE } from "../redux/modules/session"
-import { MAX_IVT } from "../redux/modules/pokemon"
+} from "../modules/helper"
+import { TEAMS } from "../modules/settings"
+import { ROUTE } from "../modules/session"
+import { MAX_IVT } from "../modules/pokemon"
 import { setTeam } from "../redux/actions/settings"
 import { configAppraisal, sortAppraisalIVCombos } from "../redux/actions/pokemon"
 import { fontStyles } from "./~styles"

@@ -2,8 +2,8 @@ import { connect } from "pwa-helpers/connect-mixin"
 import { LitElement, css, html } from "lit-element"
 import { store } from "../redux/store"
 import pokemon from "../redux/reducers/pokemon"
-import { IVT_TIERS, MAX_IVT, MAX_IV } from "../redux/modules/pokemon";
-import { getPercent } from "../redux/modules/helper";
+import { IVT_TIERS, MAX_IVT, MAX_IV } from "../modules/pokemon";
+import { getPercent } from "../modules/helper";
 import { getCPfilterProps, getCPFilterText } from "../redux/selectors/pokemon.cpfilter";
 import { getPokemon } from "../redux/selectors/pokemon";
 import { fontStyles } from "./~styles";

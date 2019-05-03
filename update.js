@@ -1,65 +1,33 @@
-const FS = require("FS-extra")
-const Listr = require("listr")
-
-const Strings = require("./scripts/strings")
-const Images = require("./scripts/images")
-const Content = require("./scripts/content")
-
-const keymapData = require("./scripts/content.keymap.json")
-const mainData = require("./scripts/content.main.json")
-
-
-/**
- * Global context managing all data
- * @constant
- * @type {Object}
- */
-const context = {
-  copyPokemonImages: !process.argv.includes("data"),
-  appendHistory: process.argv.includes("save"),
-  strings: {},
-  images: {},
-  keymap: keymapData,
-  main: mainData,
-  pokemonContent: {},
-}
+import Listr from "listr"
+import { exec } from "child_process"
+import { initContext } from "./data/curator/context.js"
+import { loadStrings } from "./data/curator/strings.js"
+import { updatePokemonImages } from "./data/curator/images.js"
+import { updateKeymap, buildContent } from "./data/curator/content.js"
+import { exportData } from "./data/curator/export.js"
 
 
 // create and execute series of tasks to complete update
 const tasks = new Listr([
-  { task: Strings.load,             title: "load strings" },
-  { task: Images.updatePokemon,     title: "update pokemon images" },
-  { task: Content.createKeymap,     title: "generate gamemaster keymap" },
-  { task: Content.buildGamedata,    title: "build data from gamemaster file" },
+  { task: updateUnityAssets,        title: "update pogo unity assets repository" },
+  { task: loadStrings,              title: "load strings" },
+  { task: updatePokemonImages,      title: "update pokemon images" },
+  { task: updateKeymap,             title: "update gamemaster keymap" },
+  { task: buildContent,             title: "build data from gamemaster file" },
   { task: exportData,               title: "export data" }
 ])
-tasks.run(context).catch(err => console.error())
 
-
+console.log("Updating web app content & assets")
+tasks.run(initContext()).catch(err => console.error())
 
 /**
- * Exports generated content and creates various logs:
- * @param  {Object} context - global context managing all data
+ * Pull new content from unity assets repository
+ * @returns promise
  */
-function exportData(context) {
-  const { strings, keymap, main, pokemonContent } = context
-  const listKeys = keymap => Object.keys(keymap).reduce((text, key) => `${text}${key}\n`, "")
-  const timestamp = new Date().getTime()
-
-  return Promise.all([
-    // log strings & keymap for reference
-    FS.outputJSON("logs/strings.json", strings),
-    FS.outputJSON("logs/keymap.json", keymap),
-    // create list of pokemon & move keys for updating spreadsheet
-    FS.outputFile("data/keys.moves.csv", listKeys(keymap.moves)),
-    FS.outputFile("data/keys.pokemon.csv", listKeys(keymap.pokemon)),
-    // create content files for webapp
-    FS.outputJSON("data/content.main.json", { timestamp, ...main }),
-    FS.outputJSON("data/content.pokemon.json", pokemonContent),
-    // append content files to update history
-    ...context.appendHistory ? [
-      FS.outputJSON(`data/versions/${timestamp}.main.json`, main),
-      FS.outputJSON(`data/versions/${timestamp}.pokemon.json`, pokemonContent),
-    ] : []
-  ])
+function updateUnityAssets() {
+  return new Promise((resolve, reject) => {
+    const child = exec("git -C assets pull origin master")
+    child.addListener("error", reject)
+    child.addListener("exit", resolve)
+  })
 }

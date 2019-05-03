@@ -1,7 +1,7 @@
 import { createSelector } from "reselect"
 import { getCPMultipliers, getWildEncounter } from "./content";
 import { getPokemon } from "./pokemon";
-import { IVT_TIERS, MAX_IV, calcCP, calcHP } from "../modules/pokemon";
+import { IVT_TIERS, MAX_IV, calcCP, calcHP } from "../../modules/pokemon";
 
 
 /**

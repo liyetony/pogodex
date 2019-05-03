@@ -10,7 +10,7 @@ export const UPDATE_POKEMON_CONTENT = "UPDATE_POKEMON_CONTENT"
  * @type {Object}
  */
 export const CONTENT_URL = {
-  MAIN: "/data/content.main.json",
+  MAIN: "/data/content.json",
   POKEMON: "/data/content.pokemon.json"
 }
 

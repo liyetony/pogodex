@@ -1,4 +1,4 @@
-import { THEME } from "../modules/settings"
+import { THEME } from "../../modules/settings"
 
 
 /**

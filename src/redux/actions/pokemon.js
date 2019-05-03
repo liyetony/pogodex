@@ -1,4 +1,4 @@
-import { debounce } from "../modules/helper"
+import { debounce } from "../../modules/helper"
 
 export const CONFIG_POKEMON_DISPLAY = "CONFIG_POKEMON_DISPLAY"
 export const SET_POKEMON_MOVES_PERSPECTIVE = "SET_POKEMON_MOVES_PERSPECTIVE"
