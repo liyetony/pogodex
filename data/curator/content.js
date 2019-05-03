@@ -71,9 +71,9 @@ export function updateKeymap(context = {}) {
  * @return {Object} Promise - resolves upon completed task.
  */
 export function buildContent(context = {}) {
-  const { paths, strings, keymap, content, pokemonContent, pokemonImageFlags } = context
+  const { paths, strings, keymap, content, extra, pokemonImageFlags } = context
     
-  if (!paths || !strings || !keymap || !content || !pokemonContent || !pokemonImageFlags)
+  if (!paths || !strings || !keymap || !content || !extra || !pokemonImageFlags)
     throw "Invalid context provided"
 
   const gamemaster = fs.readJSONSync(paths.gamemasterSrc)
@@ -216,7 +216,7 @@ export function buildContent(context = {}) {
         // add root pokemon name, generation, and image flags
         content.pokemon[baseId] = { name, gen, img: baseImg }
         // add root pokemon category and description
-        pokemonContent[baseId] = { desc, category }
+        extra.pokemon[baseId] = { desc, category }
         
         if (setting.forms) {
           // Pokemon with multiple forms extend data from root pokemon, 
@@ -242,7 +242,7 @@ export function buildContent(context = {}) {
               // add pokemon form name, generation, and image flags
               content.pokemon[pokemonId] = { name, gen, img: formImg }
               // create entry for pokemon form
-              pokemonContent[pokemonId] = {}
+              extra.pokemon[pokemonId] = {}
             }
           })
         }
@@ -255,7 +255,7 @@ export function buildContent(context = {}) {
         const pokemonId = formId === baseId ? baseId : `${baseId}${formId || ""}`
 
         // add gender ratios property to pokemon as a triplet [neutral, male, female]
-        pokemonContent[pokemonId].gender = [
+        extra.pokemon[pokemonId].gender = [
           setting.gender.genderlessPercent || 0,
           setting.gender.malePercent || 0,
           setting.gender.femalePercent || 0
@@ -299,8 +299,8 @@ export function buildContent(context = {}) {
         // weight: pokemon weight
         // height: pokemon height
         // dist: buddy walking distance
-        pokemonContent[pokemonId] = {
-          ...pokemonContent[pokemonId],
+        extra.pokemon[pokemonId] = {
+          ...extra.pokemon[pokemonId],
           weight: Math.round(setting.pokedexWeightKg * 10) / 10,
           height: Math.round(setting.pokedexHeightM * 10) / 10,
           dist: setting.kmBuddyDistance,

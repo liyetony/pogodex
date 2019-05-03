@@ -7,11 +7,11 @@ import fs from "fs-extra"
 export function exportData(context = {}) {
   const {
     paths, strings, keymap, pokemonImageFlags, 
-    ignoredTemplates, content, pokemonContent
+    ignoredTemplates, content, extra
   } = context
 
   if (!paths || !strings || !keymap || !pokemonImageFlags 
-    || !ignoredTemplates || !content || !pokemonContent)
+    || !ignoredTemplates || !content || !extra)
     throw "Invalid context provided"
 
   const { logDir, dataDir } = paths
@@ -41,9 +41,9 @@ export function exportData(context = {}) {
   }
 
   // export pokemon content
-  if (isNewContent(pokemonContent, `${dataDir}/content.pokemon.json`)) {
-    tasks.push(fs.outputJSON(`${dataDir}/content.pokemon.json`, pokemonContent))
-    tasks.push(fs.outputJSON(`${dataDir}/history/${timestamp}.content.pokemon.json`, pokemonContent))
+  if (isNewContent(extra.pokemon, `${dataDir}/content.pokemon.json`)) {
+    tasks.push(fs.outputJSON(`${dataDir}/content.pokemon.json`, extra.pokemon))
+    tasks.push(fs.outputJSON(`${dataDir}/history/${timestamp}.content.pokemon.json`, extra.pokemon))
   }
 
   return new Promise(resolve => Promise.all(tasks).then(() => resolve(timestamp)))

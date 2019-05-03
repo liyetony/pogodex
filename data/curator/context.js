@@ -92,8 +92,10 @@ export function initContext(paths = defaultPaths) {
     paths,
     keymap,
     content,
-    // pokemon related content to be lazily loaded
-    pokemonContent: {},
+    extra: {
+      // less important pokemon data that should be lazily loaded
+      pokemon: {}
+    },
     // manages all image variations for every pokemon
     pokemonImageFlags: {},
     // dictionary of in-game text
