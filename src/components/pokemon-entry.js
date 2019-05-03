@@ -26,10 +26,6 @@ import "./ui-sort"
 import "./hammer.min.js"
 
 store.addReducers({ pokemon })
-<<<<<<< HEAD
-
-=======
->>>>>>> content_curator
 class PokemonEntry extends connect(store)(LitElement) {
   static get properties() {
     return {
