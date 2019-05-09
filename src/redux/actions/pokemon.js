@@ -1,32 +1,29 @@
-import { debounce } from "../../modules/helper"
+import { debounce } from "../../modules/helper";
 
-export const CONFIG_POKEMON_DISPLAY = "CONFIG_POKEMON_DISPLAY"
-export const SET_POKEMON_MOVES_PERSPECTIVE = "SET_POKEMON_MOVES_PERSPECTIVE"
-export const SORT_POKEMON_MOVES = "SORT_POKEMON_MOVES"
-export const CONFIG_POKEMON_APPRAISAL = "CONFIG_POKEMON_APPRAISAL"
-export const SORT_POKEMON_APPRAISAL = "SORT_POKEMON_APPRAISAL"
-export const CONFIG_POKEMON_CP_FILTER = "CONFIG_POKEMON_CP_FILTER"
-
+export const CONFIG_POKEMON_IMAGE_DISPLAY = "CONFIG_POKEMON_IMAGE_DISPLAY";
+export const CONFIG_POKEMON_MOVE_LIST_DISPLAY =
+  "CONFIG_POKEMON_MOVE_LIST_DISPLAY";
+export const SORT_POKEMON_MOVES = "SORT_POKEMON_MOVES";
+export const CONFIG_POKEMON_APPRAISAL = "CONFIG_POKEMON_APPRAISAL";
+export const SORT_POKEMON_APPRAISAL = "SORT_POKEMON_APPRAISAL";
+export const CONFIG_POKEMON_CP_FILTER = "CONFIG_POKEMON_CP_FILTER";
 
 /**
  * Update pokemon image display.
- * @param {Object} props - pokemon image display properties.
+ * @param {Object} props - image display properties.
  * @returns {Action} redux action
  */
-export function configDisplay (props) {
-  return { type: CONFIG_POKEMON_DISPLAY, props }
+export function configImageDisplay(props) {
+  return { type: CONFIG_POKEMON_IMAGE_DISPLAY, props };
 }
-
 
 /**
- * Select what type of data to display for pokemon moves.
- * @param {String} view - pokemon move list perspective
- * @returns {Action} redux action
+ * Update pokemon move list display.
+ * @param {Object} props - move list display properties.
  */
-export function setMovesPerspective(view) {
-  return { type: SET_POKEMON_MOVES_PERSPECTIVE, view }
+export function configMoveDisplay(props) {
+  return { type: CONFIG_POKEMON_MOVE_LIST_DISPLAY, props };
 }
-
 
 /**
  * Sort pokemon move list.
@@ -34,13 +31,14 @@ export function setMovesPerspective(view) {
  * @returns {Action} redux action
  */
 export function sortMoves(sort) {
-  return { type: SORT_POKEMON_MOVES, sort }
+  return { type: SORT_POKEMON_MOVES, sort };
 }
 
-
 /* Debounced appraisal config */
-const configAppraisalDebounced = debounce((dispatch, props) =>
-  dispatch({ type: CONFIG_POKEMON_APPRAISAL, props }), 200)
+const configAppraisalDebounced = debounce(
+  (dispatch, props) => dispatch({ type: CONFIG_POKEMON_APPRAISAL, props }),
+  200
+);
 
 /**
  * Configure pokemon appraisal.
@@ -51,9 +49,8 @@ const configAppraisalDebounced = debounce((dispatch, props) =>
 export function configAppraisal(props, debounce = false) {
   return debounce
     ? dispatch => configAppraisalDebounced(dispatch, props)
-    : { type: CONFIG_POKEMON_APPRAISAL, props }
+    : { type: CONFIG_POKEMON_APPRAISAL, props };
 }
-
 
 /**
  * Sort pokemon IV combiations from appraisal.
@@ -61,13 +58,14 @@ export function configAppraisal(props, debounce = false) {
  * @returns {Action} redux action
  */
 export function sortAppraisalIVCombos(sort) {
-  return { type: SORT_POKEMON_APPRAISAL }
+  return { type: SORT_POKEMON_APPRAISAL, sort };
 }
 
-
 /* Debounced cp filter configuration */
-const configCPFilterDebounced = debounce((dispatch, props) =>
-  dispatch({ type: CONFIG_POKEMON_CP_FILTER, props }), 200)
+const configCPFilterDebounced = debounce(
+  (dispatch, props) => dispatch({ type: CONFIG_POKEMON_CP_FILTER, props }),
+  200
+);
 
 /**
  * Configure CP filter.
@@ -78,5 +76,5 @@ const configCPFilterDebounced = debounce((dispatch, props) =>
 export function configCPFilter(props, debounce = false) {
   return debounce
     ? dispatch => configCPFilterDebounced(dispatch, props)
-    : { type: CONFIG_POKEMON_CP_FILTER, props }
+    : { type: CONFIG_POKEMON_CP_FILTER, props };
 }

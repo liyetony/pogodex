@@ -17,7 +17,7 @@ export const ROUTE = {
     TYPE: "/images/types",
     TEAM: "/images/teams"
   }
-}
+};
 
 /**
  * Route descriptions.
@@ -32,8 +32,8 @@ export const ROUTE_DESC = {
   [ROUTE.SETTINGS]: "app settings",
   [ROUTE.POKEDEX]: "pokemon details",
   [ROUTE.APPRAISAL]: "appraise pokemon",
-  [ROUTE.CP_FILTER]: "generate pokemon cp filter",
-}
+  [ROUTE.CP_FILTER]: "generate pokemon cp filter"
+};
 
 /**
  * Dynamically import es module based on route.
@@ -44,25 +44,23 @@ export const ROUTE_DESC = {
 export function importPage(path, hash) {
   switch (path) {
     case ROUTE.HOME:
-      break
+      break;
     case ROUTE.POKEDEX:
-      if (hash)
-        import("../components/pokemon-entry.js")
-      else
-        import("../components/pokemon-list.js")
-      break
+      if (hash) import("../components/pokemon-entry.js");
+      else import("../components/pokemon-list.js");
+      break;
     case ROUTE.APPRAISAL:
-      import("../components/pokemon-appraisal.js")
-      break
+      import("../components/pokemon-appraisal.js");
+      break;
     case ROUTE.CP_FILTER:
-      import("../components/pokemon-cpfilter.js")
-      break
+      import("../components/pokemon-cpfilter.js");
+      break;
     case ROUTE.SETTINGS:
-      import("../components/app-settings.js")
-      break
+      import("../components/app-settings.js");
+      break;
     default:
-      import("../components/app-error.js")
-      path = ROUTE.ERROR
+      import("../components/app-error.js");
+      path = ROUTE.ERROR;
   }
-  return path
+  return path;
 }

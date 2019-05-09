@@ -6,8 +6,8 @@
  */
 export const THEME = {
   LIGHT: "light",
-  DARK: "dark",
-}
+  DARK: "dark"
+};
 
 /**
  * Team list.
@@ -15,8 +15,4 @@ export const THEME = {
  * @readonly
  * @type {Array}
  */
-export const TEAMS = [
-  "mystic",
-  "instinct",
-  "valor"
-]
+export const TEAMS = ["mystic", "instinct", "valor"];

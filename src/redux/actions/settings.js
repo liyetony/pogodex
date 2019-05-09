@@ -1,5 +1,5 @@
-export const SET_THEME = "SET_THEME"
-export const SET_TEAM = "SET_TEAM"
+export const SET_THEME = "SET_THEME";
+export const SET_TEAM = "SET_TEAM";
 
 /**
  * Change app theme.
@@ -16,5 +16,5 @@ export function setTheme(theme) {
  * @returns {Action} redux action
  */
 export function setTeam(team) {
-  return { type: SET_TEAM, team }
+  return { type: SET_TEAM, team };
 }

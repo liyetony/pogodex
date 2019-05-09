@@ -1,129 +1,133 @@
-import { createSelector } from "reselect"
-import { getTypeList, getMovesDict, getWeatherScalar } from "./content"
-import { getWeatherCondition } from "./session"
-import { getPokemon } from "./pokemon"
-import { moveBuffFlag } from "../../../data/curator/flags"
-
+import { createSelector } from "reselect";
+import { getTypeList, getMovesDict, getWeatherScalar } from "./content";
+import { getWeatherCondition } from "./session";
+import { getPokemon } from "./pokemon";
+import { moveBuffFlag } from "../../../data/curator/flags";
 
 /**
  * Get pokemon image display properties.
- * @param {State} state
- * @returns {Object} display properties
+ * @returns {Object} pokemon image display properties.
  */
-export const getDisplayProps = state => ({
-  shiny: 0, gender: 0,
-  ...state.pokemon.display || {}
-})
-
+export const getPokemonImageDisplayProps = state => ({
+  shiny: 0,
+  gender: 0,
+  ...(state.pokemon.display || {})
+});
 
 /**
- * Get move list perspective, determining what move data to present.
- * @param {State} state
- * @returns {String} move list perspective
+ * Get pokemon move list display properties.
+ * @returns {Object} pokemon move list display properties.
  */
-export const getPokemonMovesPerspective = state => state.pokemon.movesPerspective || 0
-
+export const getPokemonMoveListDisplayProps = state => ({
+  battle: 0,
+  grid: false,
+  ...(state.pokemon.moves || {})
+});
 
 /**
- * Get pokemon moves sorter.
- * @param {State} state
- * @returns {Array} [sortKey, sortOrder] tuple
+ * Get pokemon move list sorter.
+ * @returns {Array} [sortKey, sortOrder]
  */
-export const getPokemonMovesSorter = state => [...state.pokemon.movesSorter || ["name", 1]]
-
+export const getPokemonMoveListSorter = state => [
+  ...(state.pokemon.moveSorter || ["name", 1])
+];
 
 /**
- * Get list of pokemon moves.
- * @param {State} state
- * @returns {Array} pokemon moves
+ * Get pokemon move list.
+ * @returns {Array} pokemon move list.
  */
-const listPokemonMoves = createSelector(
+const _getPokemonMoveList = createSelector(
   [getTypeList, getMovesDict, getPokemon],
   (types, movesDict, pokemon) => {
-    if (!pokemon.valid)
-      return []
-    let moves = pokemon.moves || []
+    if (!pokemon.valid) return [];
+    let moves = pokemon.moves || [];
 
     return moves.map(key => {
-      const mid = key.slice(0, 4)
-      const move = movesDict[mid]
-      const weather = types[move.type].weather
+      const mid = key.slice(0, 4);
+      const move = movesDict[mid];
+      const weather = types[move.type].weather;
 
-      const tags = []
-      if (key.includes("E")) tags.push("event")
-      if (key.includes("L")) tags.push("legacy")
+      const tags = [];
+      if (key.includes("E")) tags.push("event");
+      if (key.includes("L")) tags.push("legacy");
+      if (key.includes("C")) tags.push("photocopy");
 
-      return { mid, ...move, tags, weather }
-    })
+      return { mid, ...move, tags, weather };
+    });
   }
-)
-
+);
 
 /**
- * Get list of pokemon moves after applying weather conditions and move perspective.
- * @param {State} state
- * @returns {Array} modified pokemon moves
+ * Select what move details to display for pokemon move list.
+ * @returns {Array} pokemon move list.
  */
-const listPokemonMovesConfigured = createSelector(
+const _selectPokemonMoveList = createSelector(
   [
-    listPokemonMoves, getPokemonMovesPerspective,
-    getWeatherCondition, getWeatherScalar
+    _getPokemonMoveList,
+    getPokemonMoveListDisplayProps,
+    getWeatherCondition,
+    getWeatherScalar
   ],
-  (moves, view, weather, scalar) => moves
-    .map(move => {
-      const { gym, battle, ...entry } = move
-      let [power, energy] = view === 0 ? gym : battle
-      let boosted
+  (moves, view, weatherCondition, weatherScalar) => {
+    return moves.map(move => {
+      const { gym, battle, ...entry } = move;
+      let [power, energy] = view.battle === 0 ? gym : battle;
 
-      if (view === 0 && weather === move.weather) {
-        power = Math.round(power * scalar * 10) / 10;
+      // check if move is boosted by weather condition.
+      // update move power accordingly.
+      let boosted;
+      if (view.battle === 0 && weatherCondition === move.weather) {
+        power = Math.round(power * weatherScalar * 10) / 10;
         boosted = true;
       }
 
-      let buffs = describeBuffs(move.buffs || [])
-
-      return { ...entry, power, energy, boosted, buffs }
-    })
-)
-
+      const buffs = describeBuffs(move.buffs || []);
+      return { ...entry, power, energy, boosted, buffs };
+    });
+  }
+);
 
 /**
- * Get sorted list of pokemon moves.
- * @param {State} state
+ * Get sorted selected pokemon move list.
  * @returns {Array} sorted pokemon moves
  */
-export const getPokemonMoves = createSelector(
-  [listPokemonMovesConfigured, getPokemonMovesSorter],
-  (moves, [sortKey, sortOrder]) => moves
-    .sort((m1, m2) => {
+export const getPokemonMoveList = createSelector(
+  [_selectPokemonMoveList, getPokemonMoveListSorter],
+  (moves, [sortKey, sortOrder]) =>
+    moves.sort((m1, m2) => {
       switch (sortKey) {
         case "name":
           return sortOrder * m1.name.localeCompare(m2.name);
         default:
-          return sortOrder * (m1[sortKey] - m2[sortKey]) ||
-            m1.name.localeCompare(m2.name);
+          return (
+            sortOrder * (m1[sortKey] - m2[sortKey]) ||
+            m1.name.localeCompare(m2.name)
+          );
       }
     })
-)
-
+);
 
 /**
  * Get description for list of buffs.
  * @param {Array} list - list of buffs
- * @returns {String} move buffs description
+ * @returns {Array} list of move buff descriptions
  */
 function describeBuffs(list) {
-  const [chance, buffs = []] = list
   const buffText = {
-    [moveBuffFlag.attackerAttackStatStageChange]: "User attack",
-    [moveBuffFlag.attackerDefenseStatStageChange]: "User defense",
-    [moveBuffFlag.targetAttackStatStageChange]: "Opponent attack",
-    [moveBuffFlag.targetDefenseStatStageChange]: "Opponent defense",
-  }
-  return buffs.reduce((text, [flag, value]) => {
-    const direction = value > 0 ? "up" : "down"
-    const buff = buffText[flag]
+    [moveBuffFlag.attackerAttackStatStageChange]: "self attack",
+    [moveBuffFlag.attackerDefenseStatStageChange]: "self defense",
+    [moveBuffFlag.targetAttackStatStageChange]: "target attack",
+    [moveBuffFlag.targetDefenseStatStageChange]: "target defense"
+  };
 
-    return !buff ? text : `${text} ${buff} ${direction},`
-  }, "").slice(0, -1)
+  const [chancePct, buffs = []] = list;
+
+  return buffs.map(([flag, delta]) => {
+    const chance = `${chancePct * 100}% chance to`;
+    const direction = delta > 0 ? "increase" : "decrease";
+    const magnitude = Math.abs(delta) > 1 ? "greatly" : "";
+    const target = buffText[flag];
+
+    return `${chance} ${magnitude} ${direction} ${target}`;
+  });
 }

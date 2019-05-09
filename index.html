@@ -1,95 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Pokemon Go Pokedex" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Pokemon Go Pokedex">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  
-  <title>PoGo</title>
-  <base href="/">
-  <link rel="icon" href="images/favicon.ico">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1976d2">
+    <title>PoGo</title>
+    <base href="/" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1976d2" />
 
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Pogodex">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Pogodex">
-  <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="images/manifest/icon-72x72.png">
-  <link rel="apple-touch-icon" sizes="96x96" href="images/manifest/icon-96x96.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="images/manifest/icon-144x144.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="images/manifest/icon-192x192.png">
-  <meta name="msapplication-TileImage" content="images/manifest/icon-144x144.png">
-  <meta name="msapplication-TileColor" content="#1976d2">
-  <meta name="msapplication-tap-highlight" content="no">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:site" content="@username">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Pogodex">
-  <meta property="og:image" content="images/manifest/icon-144x144.png"/>
-  
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet" crossorigin>
-  <style>
-    body {
-      margin: 0;
-      overflow-x: hidden;
-      overflow-y: scroll;
-      font-family: 'Roboto', sans-serif;
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Pogodex" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pogodex" />
+    <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="images/manifest/icon-72x72.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="96x96"
+      href="images/manifest/icon-96x96.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="images/manifest/icon-144x144.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="192x192"
+      href="images/manifest/icon-192x192.png"
+    />
+    <meta
+      name="msapplication-TileImage"
+      content="images/manifest/icon-144x144.png"
+    />
+    <meta name="msapplication-TileColor" content="#1976d2" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@username" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pogodex" />
+    <meta property="og:image" content="images/manifest/icon-144x144.png" />
 
-      --standard-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
-      --decelerate-easing: cubic-bezier(0.0, 0.0, 0.2, 1);
-      --accelerate-easing: cubic-bezier(0.4, 0.0, 1, 1);
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:400,500"
+      rel="stylesheet"
+      crossorigin
+    />
+    <style>
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        font-family: "Roboto", sans-serif;
+      }
+    </style>
+    <script>
+      window.process = { env: { NODE_ENV: "production" } };
 
-      --p-width: 512px;
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker.register("service-worker.js", { scope: "/" });
+        });
+      }
+    </script>
+  </head>
 
-      --primary-color-on-light: rgb(25, 118, 210);
-      --primary-color-on-dark: rgb(66, 165, 245);
-      --accent-color: #6ec6ff;
-
-      --bg1-color-light: #fdfdff;
-      --bg1-color-dark: #212121;
-
-      --bg2-color-light: #fefefe;
-      --bg2-color-dark: #2d2d30;
-
-      --fg1-color-on-light: rgba(0, 0, 0, .87);
-      --fg1-color-on-dark: rgba(255, 255, 255, .87);
-
-      --fg2-color-on-light: rgba(0, 0, 0, .60);
-      --fg2-color-on-dark: rgba(255, 255, 255, .60);
-
-      --fg3-color-on-light: rgba(0, 0, 0, .38);
-      --fg3-color-on-dark: rgba(255, 255, 255, .38);
-
-      --border-color-on-light: rgba(0, 0, 0, .14);
-      --border3-color-on-light: rgba(0, 0, 0, .07);
-      --border-color-on-dark: rgba(255, 255, 255, .14);
-      --border3-color-on-dark: rgba(255, 255, 255, .07);
-
-      --focus-color-on-light: rgba(0, 0, 0, .08);
-      --focus-color-on-dark: rgba(255, 255, 255, .08);
-    }
-  </style>
-  <script>
-    window.process = { env: { NODE_ENV: 'production' } }
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function() {
-        navigator.serviceWorker.register("service-worker.js", { scope: "/" });
-      });
-    }
-  </script>
-</head>
-
-<body>
-  <app-shell></app-shell>
-  <noscript>Please enable Javascript to use this webapp.</noscript>
-  <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-  <script src="src/components/app-shell.js" type="module"></script>
-</body>
-
+  <body>
+    <script>
+      const settings = JSON.parse(localStorage.getItem("settings") || "{}");
+      const theme = settings.theme || "light";
+      document.body.style.backgroundColor =
+        theme === "light" ? "#FFFFFF" : "#121212";
+    </script>
+    <app-shell></app-shell>
+    <noscript>Please enable Javascript to use this webapp.</noscript>
+    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="src/components/app-shell.js" type="module"></script>
+  </body>
 </html>

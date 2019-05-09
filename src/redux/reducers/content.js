@@ -1,8 +1,10 @@
 import {
-  FETCH_MAIN_CONTENT, UPDATE_MAIN_CONTENT,
-  FETCH_POKEMON_CONTENT, UPDATE_POKEMON_CONTENT
-} from "../actions/content"
-import { deepCopy } from "../../modules/helper"
+  FETCH_MAIN_CONTENT,
+  UPDATE_MAIN_CONTENT,
+  FETCH_POKEMON_CONTENT,
+  UPDATE_POKEMON_CONTENT
+} from "../actions/content";
+import { deepCopy } from "../../modules/helper";
 
 /**
  * Content reducer. Manages app content state.
@@ -10,24 +12,25 @@ import { deepCopy } from "../../modules/helper"
  * @param {Action} action
  * @return {State} state
  */
-export default function (state = {}, action = {}) {
+export default function(state = {}, action = {}) {
   switch (action.type) {
     case UPDATE_MAIN_CONTENT:
-      return { ...state, ...action.data, ready: true }
+      return { ...state, ...action.data, ready: true };
 
     case UPDATE_POKEMON_CONTENT: {
-      const pokemon = deepCopy(state.pokemon)
-      const patches = Object.entries(action.data || {})
+      const pokemon = deepCopy(state.pokemon);
+      const patches = Object.entries(action.data || {});
 
       patches.forEach(([pid, data]) => {
-        pokemon[pid] = { ...pokemon[pid], ...data }
-      })
+        pokemon[pid] = { ...pokemon[pid], ...data };
+      });
 
-      return { ...state, pokemon }
+      return { ...state, pokemon };
     }
 
     case FETCH_MAIN_CONTENT:
     case FETCH_POKEMON_CONTENT:
-    default: return state
+    default:
+      return state;
   }
 }

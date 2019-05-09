@@ -1,11 +1,12 @@
-import { 
-  CONFIG_POKEMON_DISPLAY,
-  SET_POKEMON_MOVES_PERSPECTIVE,
+import { UPDATE_ROUTE } from "../actions/session";
+import {
+  CONFIG_POKEMON_IMAGE_DISPLAY,
+  CONFIG_POKEMON_MOVE_LIST_DISPLAY,
   SORT_POKEMON_MOVES,
   CONFIG_POKEMON_APPRAISAL,
   SORT_POKEMON_APPRAISAL,
   CONFIG_POKEMON_CP_FILTER
-} from "../actions/pokemon"
+} from "../actions/pokemon";
 
 /**
  * Pokemon reducer. Manages pokemon specific state.
@@ -13,27 +14,38 @@ import {
  * @param {Action} action
  * @return {State} state
  */
-export default function (state = {}, action = {}) {
+export default function(state = {}, action = {}) {
   switch (action.type) {
-    case CONFIG_POKEMON_DISPLAY:
-      return { ...state, display: action.props }
+    case UPDATE_ROUTE:
+      return action.pid
+        ? state
+        : {
+            ...state,
+            display: undefined,
+            moves: undefined,
+            appraisal: undefined,
+            cpFilter: undefined
+          };
 
-    case SET_POKEMON_MOVES_PERSPECTIVE:
-      return { ...state, movesPerspective: action.view }
+    case CONFIG_POKEMON_IMAGE_DISPLAY:
+      return { ...state, display: action.props };
+
+    case CONFIG_POKEMON_MOVE_LIST_DISPLAY:
+      return { ...state, moves: action.props };
 
     case SORT_POKEMON_MOVES:
-      return { ...state, movesSorter: action.sort }
+      return { ...state, moveSorter: action.sort };
 
     case CONFIG_POKEMON_APPRAISAL:
-      return { ...state, appraisal: action.props }
+      return { ...state, appraisal: action.props };
 
     case SORT_POKEMON_APPRAISAL:
-      return { ...state, appraisalSorter: action.sort }
+      return { ...state, appraisalSorter: action.sort };
 
     case CONFIG_POKEMON_CP_FILTER:
-      return { ...state, cpFilter: action. props }
+      return { ...state, cpFilter: action.props };
 
     default:
-      return state
+      return state;
   }
 }
