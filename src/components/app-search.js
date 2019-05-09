@@ -1,151 +1,175 @@
-import { connect } from "pwa-helpers/connect-mixin"
-import { LitElement, css, html } from "lit-element"
-import { store } from "../redux/store"
-import { getPage } from "../redux/selectors/session"
-import { isSearching, getQuery, getQueriedPokemon } from "../redux/selectors/session.search"
-import { createLazyImageIntersectionObserver, lazyLoadImages } from "../modules/helper"
-import { ROUTE } from "../modules/session"
-import { cancelSearch, appSearch } from "../redux/actions/session"
-import { backIcon, pokeballIcon } from "./~icons"
-import { fontStyles } from "./~styles"
+import { connect } from "pwa-helpers/connect-mixin";
+import { LitElement, css, html } from "lit-element";
+import { store } from "../redux/store";
+import { getPage } from "../redux/selectors/session";
+import {
+  isSearching,
+  getQuery,
+  getQueriedPokemon
+} from "../redux/selectors/session.search";
+import { ROUTE } from "../modules/session";
+import { cancelSearch, appSearch } from "../redux/actions/session";
+import { lazyloadsImages } from "./@lazyload-images-mixin";
+import { backIcon, pokeballIcon } from "./@icons";
+import { fontStyles } from "./@styles";
+import "./+button";
 
-class AppSearch extends connect(store)(LitElement) {
+class AppSearch extends connect(store)(lazyloadsImages(LitElement)) {
   static get properties() {
     return {
       page: { type: String },
       searching: { type: Boolean },
       query: { type: String },
       pokemonList: { type: Array }
-    }
+    };
   }
 
   stateChanged(state) {
-    const page = getPage(state)
-    this.page = page === ROUTE.HOME ? ROUTE.POKEDEX : page
-    this.searching = isSearching(state)
-    this.query = getQuery(state)
-    this.pokemonList = getQueriedPokemon(state)
-  }
-
-  firstUpdated() {
-    this.lazyImgObserver = createLazyImageIntersectionObserver()
+    const page = getPage(state);
+    this.page = page === ROUTE.HOME ? ROUTE.POKEDEX : page;
+    this.searching = isSearching(state);
+    this.query = getQuery(state);
+    this.pokemonList = getQueriedPokemon(state);
   }
 
   updated(change) {
     if (change.has("searching") && this.searching) {
       const input = this.renderRoot.querySelector(".input");
-      input.select()
+      input.select();
     }
 
-    const images = this.renderRoot.querySelectorAll("img[loading='lazy']")
-    lazyLoadImages(this.lazyImgObserver, images)
+    this.lazyLoadImages();
   }
 
   render() {
-    const { page, query, pokemonList } = this
+    const { page, query, pokemonList } = this;
 
     const pokemonTemplate = pokemon => html`
-      <a class="item"
-        href="${page}#${pokemon.pid}">
-        <div class="item-avatar">
-          <img class="item-img" loading="lazy"
+      <a class="item" href="${page}#${pokemon.pid}">
+        <div class="avatar">
+          <img
+            class="img"
+            loading="lazy"
             data-src="${ROUTE.IMAGES.POKEMON}/${pokemon.image}.png"
-            @load="${e => e.currentTarget.classList.add("ok")}">
+            @load="${e => e.currentTarget.classList.add("ok")}"
+          />
           ${pokeballIcon}
         </div>
-        <span class="item-name">${pokemon.name}</span>
+        <span class="name">${pokemon.name}</span>
       </a>
-    `
+    `;
 
     return html`
       <header class="header">
-        <ui-button icon
-          @click="${e => store.dispatch(cancelSearch())}">
+        <z-button icon @click="${e => store.dispatch(cancelSearch())}">
           ${backIcon}
-        </ui-button>
-        <input class="input ffr ft"
+        </z-button>
+        <input
+          class="input ffr ft"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
+          placeholder="Search pokemon"
           .value="${query}"
-          @input="${e => store.dispatch(appSearch(e.currentTarget.value, true))}">
+          @input="${e =>
+            store.dispatch(appSearch(e.currentTarget.value, true))}"
+        />
       </header>
 
       <section class="list">
         ${pokemonList.map(pokemonTemplate)}
       </section>
-    `
+    `;
   }
 
   static get styles() {
     return [
       fontStyles,
       css`
-        :host { padding-bottom: 128px }
+        :host {
+          padding-bottom: calc(64px + var(--bottom));
+        }
 
         .header {
-          z-index: 4;
+          z-index: 1;
           position: sticky;
           top: 16px;
           padding: 0 8px;
           margin: 16px;
           display: grid;
-          grid-template: 56px / 40px 1fr;
+          grid-template: 54px / 40px 1fr;
           grid-gap: 8px;
           align-items: center;
-          border: 2px solid var(--border-color);
-          border-radius: 4px;
-          background: var(--bg2-color);
-          color: var(--fg2-color);
+          border: 1px solid var(--bgb);
+          background: var(--bg1);
+          color: var(--fgl);
         }
 
-        .header:focus-within { border-color: var(--primary-color) }
+        .header:focus-within {
+          border-color: var(--fgp);
+        }
 
         .input {
           height: 100%;
           border: none;
           outline: none;
           background: none;
-          color: var(--fg1-color);
+          color: var(--fgh);
+          text-transform: none !important;
         }
 
-        .list { display: grid }
+        .list {
+          display: grid;
+        }
 
         .item {
-          padding: 8px 18px;
+          padding-right: 16px;
+          margin-left: 16px;
           display: grid;
-          grid-template: 40px / 40px 1fr;
+          grid-template: 64px / 56px 1fr;
           grid-gap: 0 8px;
           align-items: center;
           outline: none;
-          color: var(--fg2-color);
+          color: var(--fgl);
           text-decoration: none;
+          border-bottom: 1px solid var(--bgb);
         }
-        .item:focus { background: var(--focus-color) }
-        .item-avatar {
+
+        .avatar {
           position: relative;
+          width: 100%;
+          height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--fg2-color);
+          color: var(--fgl);
         }
-        .item-img {
+
+        .img {
           width: 100%;
           will-change: opacity;
-          transition: opacity .3s var(--accelerate-easing);
+          transition: opacity 0.3s var(--accelerate-easing);
           object-fit: contain;
         }
-        .item-img ~ .icon {
+
+        .img ~ .icon {
           position: absolute;
           opacity: 0;
           will-change: opacity;
-          transition: opacity .3s var(--decelerate-easing);
-          fill: var(--fg2-color);
+          transition: opacity 0.3s var(--decelerate-easing);
+          fill: var(--fgl);
         }
-        .item-img:not(.ok) { opacity: 0 }
-        .item-img:not(.ok) ~ .icon { opacity: 1 }
-        .item-name {
+
+        .img:not(.ok) {
+          opacity: 0;
+        }
+
+        .img:not(.ok) ~ .icon {
+          opacity: 1;
+        }
+
+        .name {
           font-weight: 400;
           font-size: 1rem;
           letter-spacing: 0.03125rem;
@@ -160,23 +184,37 @@ class AppSearch extends connect(store)(LitElement) {
           }
 
           .item {
-            padding: 0 0 8px 0;
+            padding-right: 0;
+            margin-left: 0;
             grid-template: minmax(112px, 1fr) 3rem / 1fr;
-            border-bottom: 2px solid var(--border-color);
+            justify-items: center;
+            border: 1px solid transparent;
           }
 
-          .item-name {
+          .avatar {
+            border-bottom: 1px solid var(--bgb);
+          }
+
+          .name {
             padding: 0 8px;
             text-align: center;
           }
         }
 
         @media (any-hover: hover) {
-          .item:hover { background: var(--focus-color) }
+          .item:hover {
+            background: var(--bgr-h);
+            border-color: var(--bgb);
+          }
+        }
+
+        .item:focus {
+          background: var(--bgr-f);
+          border-color: var(--bgb);
         }
       `
-    ]
+    ];
   }
 }
 
-window.customElements.define("app-search", AppSearch)
+window.customElements.define("app-search", AppSearch);

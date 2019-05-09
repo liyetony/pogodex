@@ -1,12 +1,12 @@
-import { ROUTE, importPage } from "../../modules/session"
-import { debounce } from "../../modules/helper"
+import { ROUTE, importPage } from "../../modules/session";
+import { debounce } from "../../modules/helper";
 
-export const UPDATE_ROUTE = "UPDATE_ROUTE"
-export const OPEN_SNACKBAR = "OPEN_SNACKBAR"
-export const CLOSE_SNACKBAR = "CLOSE_SNACKBAR"
-export const SET_WEATHER = "SET_WEATHER"
-export const APP_SEARCH = "APP_SEARCH"
-export const CANCEL_SEARCH = "CANCEL_SEARCH"
+export const UPDATE_ROUTE = "UPDATE_ROUTE";
+export const OPEN_SNACKBAR = "OPEN_SNACKBAR";
+export const CLOSE_SNACKBAR = "CLOSE_SNACKBAR";
+export const SET_WEATHER = "SET_WEATHER";
+export const APP_SEARCH = "APP_SEARCH";
+export const CANCEL_SEARCH = "CANCEL_SEARCH";
 
 /**
  * Use URL to update route.
@@ -14,28 +14,26 @@ export const CANCEL_SEARCH = "CANCEL_SEARCH"
  * @returns {Action} redux action
  */
 export function updateRoute(location) {
-  const routes = Object.values(ROUTE)
-  const update = {}
+  const routes = Object.values(ROUTE);
+  const update = {};
 
-  let path = window.decodeURIComponent(location.pathname)
-  let hash = window.decodeURIComponent(location.hash).slice(1)
+  let path = window.decodeURIComponent(location.pathname);
+  let hash = window.decodeURIComponent(location.hash).slice(1);
 
   return dispatch => {
-    switch(path) {
+    switch (path) {
       case ROUTE.POKEDEX:
       case ROUTE.APPRAISAL:
       case ROUTE.CP_FILTER:
-        update.pid = hash
+        update.pid = hash;
     }
-    
-    update.page = importPage(path, hash)
-    dispatch({ type: UPDATE_ROUTE, update })
-  }
+
+    update.page = importPage(path, hash);
+    dispatch({ type: UPDATE_ROUTE, update });
+  };
 }
 
-
-
-let snackbarTimer
+let snackbarTimer;
 
 /**
  * Show a temporary snackbar message.
@@ -44,13 +42,14 @@ let snackbarTimer
  */
 export function showSnackbar(msg) {
   return dispatch => {
-    dispatch({ type: OPEN_SNACKBAR, msg })
-    window.clearTimeout(snackbarTimer)
-    snackbarTimer = window.setTimeout(() =>
-      dispatch({ type: CLOSE_SNACKBAR }), 1500)
-  }
+    dispatch({ type: OPEN_SNACKBAR, msg });
+    window.clearTimeout(snackbarTimer);
+    snackbarTimer = window.setTimeout(
+      () => dispatch({ type: CLOSE_SNACKBAR }),
+      1500
+    );
+  };
 }
-
 
 /**
  * Change weather.
@@ -58,13 +57,14 @@ export function showSnackbar(msg) {
  * @returns {Action} redux action
  */
 export function setWeather(wid) {
-  return { type: SET_WEATHER, wid }
+  return { type: SET_WEATHER, wid };
 }
 
-
 /* Debounced app search functionality */
-const appSearchDebounced = debounce((dispatch, query) => 
-  dispatch({ type: APP_SEARCH, query }), 200)
+const appSearchDebounced = debounce(
+  (dispatch, query) => dispatch({ type: APP_SEARCH, query }),
+  200
+);
 
 /**
  * Search app.
@@ -73,10 +73,10 @@ const appSearchDebounced = debounce((dispatch, query) =>
  * @returns {Action} redux action
  */
 export function appSearch(query, debounce = false) {
-  import("../../components/app-search.js")
+  import("../../components/app-search.js");
   return debounce
     ? dispatch => appSearchDebounced(dispatch, query)
-    : { type: APP_SEARCH, query }
+    : { type: APP_SEARCH, query };
 }
 
 /**
@@ -84,5 +84,5 @@ export function appSearch(query, debounce = false) {
  * @returns {Action} redux action
  */
 export function cancelSearch() {
-  return { type: CANCEL_SEARCH }
+  return { type: CANCEL_SEARCH };
 }

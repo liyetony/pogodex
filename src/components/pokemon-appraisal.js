@@ -1,31 +1,39 @@
-import { connect } from "pwa-helpers/connect-mixin"
-import { LitElement, css, html } from "lit-element"
-import { store } from "../redux/store"
-import pokemon from "../redux/reducers/pokemon"
-import { getPokemon } from "../redux/selectors/pokemon"
-import { getTeam } from "../redux/selectors/settings"
+import { connect } from "pwa-helpers/connect-mixin";
+import { LitElement, css, html } from "lit-element";
+import { store } from "../redux/store";
+import pokemon from "../redux/reducers/pokemon";
+import { getPokemon } from "../redux/selectors/pokemon";
+import { getTeam } from "../redux/selectors/settings";
 import {
-  getStardustOptions, getIVTOptions, getIVOptions,
-  getAppraisalProps, getIVCombinations, getIVComboSorter
-} from "../redux/selectors/pokemon.appraisal"
+  getStardustOptions,
+  getIVTOptions,
+  getIVOptions,
+  getAppraisalProps,
+  getIVCombinations,
+  getIVComboSorter
+} from "../redux/selectors/pokemon.appraisal";
+import { getPercent } from "../modules/helper";
+import { TEAMS } from "../modules/settings";
+import { ROUTE } from "../modules/session";
+import { MAX_IVT } from "../modules/pokemon";
+import { setTeam } from "../redux/actions/settings";
 import {
-  createLazyImageIntersectionObserver, lazyLoadImages, getPercent
-} from "../modules/helper"
-import { TEAMS } from "../modules/settings"
-import { ROUTE } from "../modules/session"
-import { MAX_IVT } from "../modules/pokemon"
-import { setTeam } from "../redux/actions/settings"
-import { configAppraisal, sortAppraisalIVCombos } from "../redux/actions/pokemon"
-import { fontStyles } from "./~styles"
-import "./pokemon-selector"
-import "./ui-button"
-import "./ui-input"
-import "./ui-toggle"
-import "./ui-sort"
+  configAppraisal,
+  sortAppraisalIVCombos
+} from "../redux/actions/pokemon";
+import { lazyloadsImages } from "./@lazyload-images-mixin";
+import { fontStyles } from "./@styles";
+import "./pokemon-selector";
+import "./+textfield";
+import "./+select";
+import "./+checkbox";
+import "./+button";
+import "./+radio";
+import "./+order";
 
-store.addReducers({ pokemon })
+store.addReducers({ pokemon });
 
-class PokemonAppraisal extends connect(store)(LitElement) {
+class PokemonAppraisal extends connect(store)(lazyloadsImages(LitElement)) {
   static get properties() {
     return {
       pokemon: { type: Object },
@@ -36,159 +44,65 @@ class PokemonAppraisal extends connect(store)(LitElement) {
       config: { type: Object },
       comboSorter: { type: Array },
       combos: { type: Array }
-    }
+    };
   }
 
   stateChanged(state) {
-    this.pokemon = getPokemon(state)
-    this.team = getTeam(state)
-    this.stardustOptions = getStardustOptions(state)
-    this.ivtOptions = getIVTOptions(state)
-    this.ivOptions = getIVOptions(state)
-    this.config = getAppraisalProps(state)
-    this.comboSorter = getIVComboSorter(state)
-    this.combos = getIVCombinations(state)
-  }
-
-  firstUpdated() {
-    this.lazyImgIntersectionObserver = createLazyImageIntersectionObserver()
+    this.pokemon = getPokemon(state);
+    this.team = getTeam(state);
+    this.stardustOptions = getStardustOptions(state);
+    this.ivtOptions = getIVTOptions(state);
+    this.ivOptions = getIVOptions(state);
+    this.config = getAppraisalProps(state);
+    this.comboSorter = getIVComboSorter(state);
+    this.combos = getIVCombinations(state);
   }
 
   updated() {
-    const images = this.renderRoot.querySelectorAll("img[loading='lazy']")
-    lazyLoadImages(this.lazyImgIntersectionObserver, images)
+    this.lazyLoadImages();
   }
 
   render() {
-    const { pokemon } = this
-
-    return html`
-      <pokemon-selector
-        .name="${pokemon.name}"
-        .swap="${pokemon.valid}">
-      </pokemon-selector>
-      ${pokemon.valid 
-        ? html`
-          ${this.configTemplate}
-          ${this.combosTemplate}`
-        : this.idleTemplate
-      }
-    `
-  }
-
-  get idleTemplate() {
-    return html`
-    `
-  }
-
-  get configTemplate() {
-    const { team, stardustOptions, ivtOptions, ivOptions, config } = this
+    const { team, pokemon, config, combos } = this;
+    const { stardustOptions, ivtOptions, ivOptions } = this;
+    const [sortKey, sortOrder] = this.comboSorter;
 
     const updateConfig = (props, debounce = false) => {
-      store.dispatch(configAppraisal({ ...config, ...props }, debounce))
-    }
+      store.dispatch(configAppraisal({ ...config, ...props }, debounce));
+    };
+
+    const getOrder = key => (key === sortKey ? sortOrder : 0);
+
+    const sort = key => e =>
+      store.dispatch(sortAppraisalIVCombos([key, e.detail]));
 
     const teamTemplate = (name, index) => html`
-      <ui-button flat
+      <z-button
         class="team"
+        toggle
         .label="${name}"
         ?active="${index === team}"
-        @click="${e => store.dispatch(setTeam(index))}">
-        <img class="team-lead"
+        @change="${e => store.dispatch(setTeam(index))}"
+      >
+        <img
+          class="team-lead"
           loading="lazy"
           alt="team ${name}"
-          data-src="${ROUTE.IMAGES.TEAM}/${name}.png">
-        <span class="fbt">${name}</span>
-      </ui-button>
-    `
+          data-src="${ROUTE.IMAGES.TEAM}/${name}.png"
+        />
+      </z-button>
+    `;
 
     const appraisalTemplate = key => (text, index) => html`
-      <ui-toggle
-        class="${key}"
-        type="radio"
-        .label="${text}"
+      <z-radio
+        class="reply"
+        label="${text}"
         ?checked="${index === config[key]}"
-        @change="${e => updateConfig({ [key]: index })}">
-        <span class="fbd2 label">${text}</span>
-      </ui-toggle>
-    `
-
-    return html`
-      <h1 class="heading fh5">Appraise</h1>
-      <section class="stats">
-        <ui-input required
-          class="cp"
-          label="CP"
-          type="number" min="10"
-          .value="${config.cp}"
-          @change="${e => updateConfig({ cp: e.detail }, true)}">
-        </ui-input>
-        <ui-input required
-          class="hp"
-          label="HP"
-          type="number" min="10"
-          .value="${config.hp}"
-          @change="${e => updateConfig({ hp: e.detail }, true)}">
-        </ui-input>
-        <ui-input required select
-          class="sd"
-          label="Stardust"
-          type="number" min="10"
-          .options="${stardustOptions}"
-          .value="${config.sd}"
-          @change="${e => updateConfig({ sd: e.detail })}">
-        </ui-input>
-        <ui-toggle
-          class="lck"
-          label="Lucky"
-          .value="${config.lucky}"
-          @change="${e => updateConfig({ lucky: e.detail })}">
-          <span class="fbd2 label">Lucky</span>
-        </ui-toggle>
-      </section>
-      <section class="appraisal">
-        <div class="teams">${TEAMS.map(teamTemplate)}</div>
-        <div class="ivs">
-          ${ivtOptions.map(appraisalTemplate("ivt"))}
-          <div class="iv-stats">
-            <ui-toggle
-              class="iv-stat"
-              type="checkbox"
-              label="Attack"
-              ?checked="${config.att}"
-              @change="${e => updateConfig({ att: e.detail })}">
-            <span class="fbd2 label">Attack</span>
-            </ui-toggle>
-            <ui-toggle
-              class="iv-stat"
-              type="checkbox"
-              label="Defense"
-              ?checked="${config.def}"
-              @change="${e => updateConfig({ def: e.detail })}">
-              <span class="fbd2 label">Defense</span>
-
-            </ui-toggle>
-            <ui-toggle
-              class="iv-stat"
-              type="checkbox"
-              label="Health"
-              ?checked="${config.sta}"
-              @change="${e => updateConfig({ sta: e.detail })}">
-              <span class="fbd2 label">Health</span>
-            </ui-toggle>
-          </div>
-          ${ivOptions.map(appraisalTemplate("iv"))}
-        </div>
-      </section>
-    `
-  }
-
-  get combosTemplate() {
-    const { combos } = this
-    const [sortKey, sortOrder] = this.comboSorter
-
-    const getOrder = key => key === sortKey ? sortOrder : 0
-    const sort = key => e => store.dispatch(sortAppraisalIVCombos([key, e.detail]))
+        ?disabled="${!pokemon.valid}"
+        @change="${e => updateConfig({ [key]: index })}"
+      >
+      </z-radio>
+    `;
 
     const comboTemplate = combo => html`
       <div class="combo">
@@ -198,150 +112,273 @@ class PokemonAppraisal extends connect(store)(LitElement) {
         <span>${combo.sta}</span>
         <span>${combo.lv.toFixed(1)}</span>
       </div>
-    `
+    `;
 
     return html`
-      <section class="combos">
-        <h1 class="heading fh5">IV Combinations</h1>
-        <header class="combo">
-          <ui-sort
-            label="IV Total"
-            .order="${getOrder("ivt")}"
-            @change="${sort("ivt")}">
-            <abbr class="ft" title="Individual Value Total">IVT</abbr>
-          </ui-sort>
-          <ui-sort
-            label="Attack"
-            .order="${getOrder("att")}"
-            @change="${sort("att")}">
-            <span class="ft">Attack</span>
-          </ui-sort>
-          <ui-sort
-            label="Defense"
-            .order="${getOrder("def")}"
-            @change="${sort("def")}">
-            <span class="ft">Defense</span>
-          </ui-sort>
-          <ui-sort
-            label="Stamina"
-            .order="${getOrder("sta")}"
-            @change="${sort("sta")}">
-            <span class="ft">Stamina</span>
-          </ui-sort>
-          <ui-sort
-            label="Level"
-            .order="${getOrder("lv")}"
-            @change="${sort("lv")}">
-            <span class="ft">Level</span>
-          </ui-sort>
-        </header>
-        ${combos.map(comboTemplate)}
-        <p class="combo-none fbd1"
-          ?hidden="${combos.length}">
-          No combinations
-        </p>
+      <pokemon-selector .name="${pokemon.name}"></pokemon-selector>
+
+      <h1 class="fh5">Appraise</h1>
+      <section class="teams">${TEAMS.map(teamTemplate)}</section>
+
+      <section class="pokemon">
+        <h2 class="ft">Pokemon</h2>
+        <z-textfield
+          required
+          label="CP"
+          type="number"
+          min="10"
+          ?disabled="${!pokemon.valid}"
+          .value="${config.cp}"
+          @change="${e => updateConfig({ cp: e.detail })}"
+        ></z-textfield>
+        <z-textfield
+          required
+          label="HP"
+          type="number"
+          min="10"
+          ?disabled="${!pokemon.valid}"
+          .value="${config.hp}"
+          @change="${e => updateConfig({ hp: e.detail })}"
+        ></z-textfield>
+        <z-checkbox
+          class="lucky"
+          label="Lucky Pokemon"
+          ?disabled="${!pokemon.valid}"
+          .value="${config.lucky}"
+          @change="${e => updateConfig({ lucky: e.detail })}"
+        >
+        </z-checkbox>
+        <z-select
+          required
+          label="Stardust Cost"
+          ?disabled="${!pokemon.valid}"
+          .options="${stardustOptions}"
+          .value="${config.sd}"
+          @change="${e => updateConfig({ sd: e.detail })}"
+        ></z-select>
       </section>
-    `
+
+      <div class="appraisal">
+        <section class="overall replies">
+          <h2 class="ft">Overall</h2>
+          ${ivtOptions.map(appraisalTemplate("ivt"))}
+        </section>
+
+        <section class="attributes replies">
+          <h2 class="ft">Best attributes</h2>
+          <div class="attribute-select reply">
+            <z-checkbox
+              label="Attack"
+              ?checked="${config.att}"
+              ?disabled="${!pokemon.valid}"
+              @change="${e => updateConfig({ att: e.detail })}"
+            ></z-checkbox>
+            <z-checkbox
+              label="Defense"
+              ?checked="${config.def}"
+              ?disabled="${!pokemon.valid}"
+              @change="${e => updateConfig({ def: e.detail })}"
+            ></z-checkbox>
+            <z-checkbox
+              label="Health"
+              ?checked="${config.sta}"
+              ?disabled="${!pokemon.valid}"
+              @change="${e => updateConfig({ sta: e.detail })}"
+            ></z-checkbox>
+          </div>
+          ${ivOptions.map(appraisalTemplate("iv"))}
+        </section>
+      </div>
+
+      <h1 class="fh5"><abbr title="Individual Value">IV</abbr> Combinations</h1>
+      <section class="combos">
+        <header class="combo">
+          <z-order
+            label="%"
+            ?disabled="${!combos.length}"
+            .order="${getOrder("ivt")}"
+            @change="${sort("ivt")}"
+          ></z-order>
+          <z-order
+            label="Attack"
+            ?disabled="${!combos.length}"
+            .order="${getOrder("att")}"
+            @change="${sort("att")}"
+          ></z-order>
+          <z-order
+            label="Defense"
+            ?disabled="${!combos.length}"
+            .order="${getOrder("def")}"
+            @change="${sort("def")}"
+          ></z-order>
+          <z-order
+            label="Stamina"
+            ?disabled="${!combos.length}"
+            .order="${getOrder("sta")}"
+            @change="${sort("sta")}"
+          ></z-order>
+          <z-order
+            label="Level"
+            ?disabled="${!combos.length}"
+            .order="${getOrder("lv")}"
+            @change="${sort("lv")}"
+          ></z-order>
+        </header>
+        <p class="empty fbd1" ?hidden="${combos.length}">
+          No matching <abbr title="Individual Value">IV</abbr> combinations
+          avaiable.
+        </p>
+        ${combos.map(comboTemplate)}
+      </section>
+    `;
   }
 
   static get styles() {
     return [
       fontStyles,
       css`
-        abbr { text-decoration: none }
-
-        .heading { margin: 24px 16px; color: var(--fg1-color); }
-
-        .stats {
-          margin: 32px 16px;
-          display: grid;
-          grid-template-columns: repeat(12, 1fr);
-          grid-auto-rows: minmax(48px, min-content);
-          grid-gap: 16px 8px;
-        }
-        .cp, .hp { grid-column: span 6 }
-        .sd { grid-column: span 7 }
-        .lck {
-          grid-column: span 5;
-          justify-self: start;
-          padding: 0 8px;
+        :host {
+          margin-bottom: var(--bottom);
+          color: var(--fgh);
         }
 
-        .appraisal { margin: 32px 0 }
+        abbr {
+          text-decoration: underline var(--fgd);
+        }
+
+        h1 {
+          margin: 16px;
+          margin-top: 32px;
+        }
+
+        h2 {
+          margin: 16px;
+          color: var(--fgl);
+        }
+
+        pokemon-selector {
+          position: sticky;
+          top: 16px;
+          z-index: 1;
+        }
 
         .teams {
-          position: relative;
+          margin: 0 16px;
           display: grid;
-          grid-template: min-content / repeat(auto-fill, minmax(min-content, 80px));
+          grid-template: auto / repeat(3, 64px);
+          grid-gap: 16px;
         }
-        .teams:before {
-          content: "";
-          position: absolute;
-          left: 0; bottom: 0;
-          width: 100%;
-          height: 2px;
-          background: var(--border-color);
-        }
+
         .team {
-          flex-flow: column;
+          width: 64px;
+          height: 64px;
+          border: 2px solid transparent;
+          border-radius: 50%;
           box-sizing: border-box;
-          padding: 5px 12px 4px 12px;
-          border-bottom: 3px solid transparent;
-          color: var(--fg2-color);
         }
-        .team[active] { border-color: var(--primary-color) }
-        .team-lead { width: 48px; height: 48px; margin-bottom: 4px; }
-        .iv-stats { display: flex }
-        .iv-stat { padding: 0 0 0 8px }
-        .ivs {
+
+        .team-lead {
+          flex: 0 0 auto;
+          width: 48px;
+          height: 48px;
+        }
+
+        .team[active] {
+          border-color: var(--fgp);
+        }
+
+        .pokemon {
+          margin: 16px;
           display: grid;
-          grid-template: repeat(9, 64px) / 1fr;
-          grid-auto-flow: column;
+          grid-template: auto auto / 1fr 1fr;
+          grid-gap: 8px 16px;
+          align-items: start;
+        }
+
+        .pokemon > h2 {
+          grid-column: 1 / -1;
+          margin: 0;
+        }
+
+        .lucky {
+          position: relative;
+          left: -8px;
+          margin-top: 8px;
+        }
+
+        .appraisal {
+          margin: 16px 0;
+          display: grid;
+          grid-gap: 16px;
+        }
+
+        .reply {
+          margin: 12px 16px 12px 6px;
+        }
+
+        .attribute-select {
+          display: flex;
+        }
+
+        .attribute-select > * {
+          margin-right: 8px;
         }
 
         .combos {
-          display: grid;
-          padding-bottom: 128px;
+          padding-bottom: 64px;
+          margin: 0 16px;
         }
+
         .combo {
-          min-height: 48px;
           display: grid;
-          grid-template-columns: 56px repeat(auto-fit, minmax(40px, 1fr));
-          grid-column-gap: 8px;
           align-items: center;
+          grid-template-columns: 56px repeat(auto-fit, minmax(40px, 1fr));
+          grid-template-rows: 48px;
           color: var(--fg1-color);
+          border-left: 1px solid var(--bgb);
+          border-right: 1px solid var(--bgb);
+          border-bottom: 1px solid var(--bgb);
         }
-        .combo:not(header) { justify-items: center }
+
+        .combo:not(header) {
+          justify-items: center;
+        }
 
         header.combo {
           position: sticky;
           top: 0px;
-          border-bottom: 2px solid var(--border-color);
+          grid-template-rows: 56px;
+          border-top: 1px solid var(--bgb);
           background: var(--bg1-color);
         }
 
-        .combo-none {
-          display: flex;
-          justify-content: center;
-          margin: 64px 16px;
-          color: var(--fg3-color);
+        .empty {
+          padding: 64px 16px;
+          margin: 0;
+          text-align: center;
+          border: 1px solid var(--bgb);
         }
-        .combo-none[hidden] { display: none }
-
 
         @media (min-width: 640px) {
-          .cp, .hp, .sd, .lck { grid-column: span 3 }
-          .ivs { grid-template: repeat(5, 64px) / 1fr 1fr }
-          .ivt { grid-column: 1 }
-          .iv-stats, .iv { grid-column: 2 }
+          .pokemon {
+            grid-template: auto / 1fr 1fr auto 1fr;
+          }
+        }
+
+        @media (min-width: 672px) {
+          .appraisal {
+            grid-template-columns: 1fr 1fr;
+          }
         }
 
         @media (any-hover: hover) {
-          .combo:not(header):hover { background: var(--focus-color) }
+          .combo:not(header):hover {
+            background: var(--focus-color);
+          }
         }
       `
-    ]
+    ];
   }
 }
 
-window.customElements.define("pokemon-appraisal", PokemonAppraisal)
+window.customElements.define("pokemon-appraisal", PokemonAppraisal);
